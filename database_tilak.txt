@@ -1,0 +1,518 @@
+-- ============================================================
+--  RESOURCE TRACKER — Full MySQL Schema
+--  Version 1.0  |  All 26 Tables
+-- ============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_MODE = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- ============================================================
+-- 1. ROLES
+-- ============================================================
+CREATE TABLE roles (
+    role_id       INT            NOT NULL AUTO_INCREMENT,
+    role_name     VARCHAR(50)    NOT NULL UNIQUE,
+    description   VARCHAR(255)   DEFAULT NULL,
+    created_at    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO roles (role_name, description) VALUES
+    ('super_admin',  'Full system access across all institutions'),
+    ('admin',        'College-wide user and resource management'),
+    ('facility_mgr', 'Manages resource details and maintenance'),
+    ('booking_mgr',  'Creates and approves bookings for their department'),
+    ('viewer',       'Browse resources and submit booking requests');
+
+-- ============================================================
+-- 2. PERMISSIONS
+-- ============================================================
+CREATE TABLE permissions (
+    permission_id  INT           NOT NULL AUTO_INCREMENT,
+    module         VARCHAR(60)   NOT NULL,
+    action         VARCHAR(60)   NOT NULL,
+    description    VARCHAR(255)  DEFAULT NULL,
+    PRIMARY KEY (permission_id),
+    UNIQUE KEY uq_perm (module, action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO permissions (module, action) VALUES
+    ('users',         'view'),   ('users',         'create'),
+    ('users',         'edit'),   ('users',         'delete'),
+    ('resources',     'view'),   ('resources',     'create'),
+    ('resources',     'edit'),   ('resources',     'delete'),
+    ('bookings',      'view'),   ('bookings',      'create'),
+    ('bookings',      'approve'),('bookings',      'cancel'),
+    ('maintenance',   'view'),   ('maintenance',   'create'),
+    ('maintenance',   'edit'),   ('reports',       'view'),
+    ('reports',       'export'), ('system_config', 'view'),
+    ('system_config', 'edit');
+
+-- ============================================================
+-- 3. ROLE_PERMISSIONS
+-- ============================================================
+CREATE TABLE role_permissions (
+    id             INT  NOT NULL AUTO_INCREMENT,
+    role_id        INT  NOT NULL,
+    permission_id  INT  NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_role_perm (role_id, permission_id),
+    CONSTRAINT fk_rp_role FOREIGN KEY (role_id)
+        REFERENCES roles (role_id) ON DELETE CASCADE,
+    CONSTRAINT fk_rp_perm FOREIGN KEY (permission_id)
+        REFERENCES permissions (permission_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 4. DEPARTMENTS
+-- ============================================================
+CREATE TABLE departments (
+    department_id  INT           NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(100)  NOT NULL,
+    code           VARCHAR(20)   NOT NULL UNIQUE,
+    hod_user_id    INT           DEFAULT NULL,     -- FK added after users
+    is_active      TINYINT(1)    NOT NULL DEFAULT 1,
+    created_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (department_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 5. USERS
+-- ============================================================
+CREATE TABLE users (
+    user_id        INT            NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(100)   NOT NULL,
+    email          VARCHAR(150)   NOT NULL UNIQUE,
+    password_hash  VARCHAR(255)   NOT NULL,
+    role_id        INT            NOT NULL,
+    department_id  INT            DEFAULT NULL,
+    is_active      TINYINT(1)     NOT NULL DEFAULT 1,
+    last_login     TIMESTAMP      DEFAULT NULL,
+    created_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_role FOREIGN KEY (role_id)
+        REFERENCES roles (role_id),
+    CONSTRAINT fk_user_dept FOREIGN KEY (department_id)
+        REFERENCES departments (department_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Now add the HOD FK on departments
+ALTER TABLE departments
+    ADD CONSTRAINT fk_dept_hod FOREIGN KEY (hod_user_id)
+        REFERENCES users (user_id) ON DELETE SET NULL;
+
+-- ============================================================
+-- 6. RESOURCE_TYPES
+-- ============================================================
+CREATE TABLE resource_types (
+    type_id    INT           NOT NULL AUTO_INCREMENT,
+    type_name  VARCHAR(60)   NOT NULL UNIQUE,
+    description VARCHAR(255) DEFAULT NULL,
+    icon       VARCHAR(100)  DEFAULT NULL,
+    created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (type_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO resource_types (type_name, description) VALUES
+    ('Classroom',    'Standard teaching rooms with whiteboard and projector'),
+    ('Auditorium',   'Large-capacity venue for events and seminars'),
+    ('Lab',          'Practical and research labs with specialised equipment'),
+    ('Seminar Hall', 'Mid-size halls for presentations and meetings');
+
+-- ============================================================
+-- 7. RESOURCES
+-- ============================================================
+CREATE TABLE resources (
+    resource_id    INT           NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(100)  NOT NULL,
+    code           VARCHAR(30)   NOT NULL UNIQUE,
+    type_id        INT           NOT NULL,
+    department_id  INT           DEFAULT NULL,
+    capacity       SMALLINT      NOT NULL DEFAULT 0,
+    building       VARCHAR(80)   DEFAULT NULL,
+    floor          VARCHAR(20)   DEFAULT NULL,
+    description    TEXT          DEFAULT NULL,
+    is_active      TINYINT(1)    NOT NULL DEFAULT 1,
+    created_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (resource_id),
+    CONSTRAINT fk_res_type FOREIGN KEY (type_id)
+        REFERENCES resource_types (type_id),
+    CONSTRAINT fk_res_dept FOREIGN KEY (department_id)
+        REFERENCES departments (department_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 8. RESOURCE_FACILITIES
+-- ============================================================
+CREATE TABLE resource_facilities (
+    facility_id    INT           NOT NULL AUTO_INCREMENT,
+    resource_id    INT           NOT NULL,
+    facility_name  VARCHAR(100)  NOT NULL,
+    quantity       SMALLINT      NOT NULL DEFAULT 1,
+    is_working     TINYINT(1)    NOT NULL DEFAULT 1,
+    PRIMARY KEY (facility_id),
+    CONSTRAINT fk_fac_res FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 9. RESOURCE_IMAGES
+-- ============================================================
+CREATE TABLE resource_images (
+    image_id     INT           NOT NULL AUTO_INCREMENT,
+    resource_id  INT           NOT NULL,
+    image_url    VARCHAR(500)  NOT NULL,
+    is_primary   TINYINT(1)    NOT NULL DEFAULT 0,
+    uploaded_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (image_id),
+    CONSTRAINT fk_img_res FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 10. TIME_SLOTS
+-- ============================================================
+CREATE TABLE time_slots (
+    slot_id     INT          NOT NULL AUTO_INCREMENT,
+    label       VARCHAR(50)  NOT NULL,
+    start_time  TIME         NOT NULL,
+    end_time    TIME         NOT NULL,
+    is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+    PRIMARY KEY (slot_id),
+    CONSTRAINT chk_slot_time CHECK (end_time > start_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO time_slots (label, start_time, end_time) VALUES
+    ('8:00 AM – 9:00 AM',   '08:00:00', '09:00:00'),
+    ('9:00 AM – 10:00 AM',  '09:00:00', '10:00:00'),
+    ('10:00 AM – 11:00 AM', '10:00:00', '11:00:00'),
+    ('11:00 AM – 12:00 PM', '11:00:00', '12:00:00'),
+    ('12:00 PM – 1:00 PM',  '12:00:00', '13:00:00'),
+    ('1:00 PM – 2:00 PM',   '13:00:00', '14:00:00'),
+    ('2:00 PM – 3:00 PM',   '14:00:00', '15:00:00'),
+    ('3:00 PM – 4:00 PM',   '15:00:00', '16:00:00'),
+    ('4:00 PM – 5:00 PM',   '16:00:00', '17:00:00');
+
+-- ============================================================
+-- 11. BOOKINGS
+-- ============================================================
+CREATE TABLE bookings (
+    booking_id        INT           NOT NULL AUTO_INCREMENT,
+    resource_id       INT           NOT NULL,
+    booked_by_user_id INT           NOT NULL,
+    booking_date      DATE          NOT NULL,
+    slot_id           INT           NOT NULL,
+    purpose           VARCHAR(255)  NOT NULL,
+    status            ENUM('pending','approved','rejected','cancelled','completed')
+                                    NOT NULL DEFAULT 'pending',
+    created_at        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (booking_id),
+    UNIQUE KEY uq_booking_slot (resource_id, booking_date, slot_id),
+    KEY idx_booking_date   (booking_date),
+    KEY idx_booking_status (status),
+    CONSTRAINT fk_bk_res  FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id),
+    CONSTRAINT fk_bk_user FOREIGN KEY (booked_by_user_id)
+        REFERENCES users (user_id),
+    CONSTRAINT fk_bk_slot FOREIGN KEY (slot_id)
+        REFERENCES time_slots (slot_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 12. BOOKING_APPROVALS
+-- ============================================================
+CREATE TABLE booking_approvals (
+    approval_id       INT           NOT NULL AUTO_INCREMENT,
+    booking_id        INT           NOT NULL UNIQUE,
+    approver_user_id  INT           NOT NULL,
+    decision          ENUM('approved','rejected') NOT NULL,
+    remarks           TEXT          DEFAULT NULL,
+    decided_at        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (approval_id),
+    CONSTRAINT fk_appr_booking  FOREIGN KEY (booking_id)
+        REFERENCES bookings (booking_id) ON DELETE CASCADE,
+    CONSTRAINT fk_appr_user     FOREIGN KEY (approver_user_id)
+        REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 13. BOOKING_CANCELLATIONS
+-- ============================================================
+CREATE TABLE booking_cancellations (
+    cancellation_id       INT           NOT NULL AUTO_INCREMENT,
+    booking_id            INT           NOT NULL UNIQUE,
+    cancelled_by_user_id  INT           NOT NULL,
+    reason                TEXT          DEFAULT NULL,
+    cancelled_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (cancellation_id),
+    CONSTRAINT fk_canc_booking FOREIGN KEY (booking_id)
+        REFERENCES bookings (booking_id) ON DELETE CASCADE,
+    CONSTRAINT fk_canc_user    FOREIGN KEY (cancelled_by_user_id)
+        REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 14. RECURRING_BOOKINGS
+-- ============================================================
+CREATE TABLE recurring_bookings (
+    recurring_id      INT           NOT NULL AUTO_INCREMENT,
+    resource_id       INT           NOT NULL,
+    booked_by_user_id INT           NOT NULL,
+    slot_id           INT           NOT NULL,
+    recurrence_type   ENUM('daily','weekly') NOT NULL DEFAULT 'weekly',
+    day_of_week       TINYINT       DEFAULT NULL COMMENT '0=Sun … 6=Sat',
+    start_date        DATE          NOT NULL,
+    end_date          DATE          NOT NULL,
+    status            ENUM('active','cancelled') NOT NULL DEFAULT 'active',
+    created_at        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (recurring_id),
+    CONSTRAINT fk_rec_res  FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id),
+    CONSTRAINT fk_rec_user FOREIGN KEY (booked_by_user_id)
+        REFERENCES users (user_id),
+    CONSTRAINT fk_rec_slot FOREIGN KEY (slot_id)
+        REFERENCES time_slots (slot_id),
+    CONSTRAINT chk_rec_dates CHECK (end_date >= start_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 15. MAINTENANCE_WINDOWS
+-- ============================================================
+CREATE TABLE maintenance_windows (
+    maintenance_id      INT           NOT NULL AUTO_INCREMENT,
+    resource_id         INT           NOT NULL,
+    start_datetime      DATETIME      NOT NULL,
+    end_datetime        DATETIME      NOT NULL,
+    reason              TEXT          DEFAULT NULL,
+    created_by_user_id  INT           NOT NULL,
+    status              ENUM('scheduled','ongoing','completed','cancelled')
+                                      NOT NULL DEFAULT 'scheduled',
+    created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (maintenance_id),
+    KEY idx_maint_res    (resource_id),
+    KEY idx_maint_status (status),
+    CONSTRAINT fk_maint_res  FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id),
+    CONSTRAINT fk_maint_user FOREIGN KEY (created_by_user_id)
+        REFERENCES users (user_id),
+    CONSTRAINT chk_maint_dt  CHECK (end_datetime > start_datetime)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 16. MAINTENANCE_AFFECTED_BOOKINGS
+-- ============================================================
+CREATE TABLE maintenance_affected_bookings (
+    id              INT        NOT NULL AUTO_INCREMENT,
+    maintenance_id  INT        NOT NULL,
+    booking_id      INT        NOT NULL,
+    notified_at     TIMESTAMP  DEFAULT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_maint_booking (maintenance_id, booking_id),
+    CONSTRAINT fk_mab_maint   FOREIGN KEY (maintenance_id)
+        REFERENCES maintenance_windows (maintenance_id) ON DELETE CASCADE,
+    CONSTRAINT fk_mab_booking FOREIGN KEY (booking_id)
+        REFERENCES bookings (booking_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 17. NOTIFICATIONS
+-- ============================================================
+CREATE TABLE notifications (
+    notification_id  INT           NOT NULL AUTO_INCREMENT,
+    user_id          INT           NOT NULL,
+    type             VARCHAR(60)   NOT NULL,
+    title            VARCHAR(150)  NOT NULL,
+    message          TEXT          NOT NULL,
+    is_read          TINYINT(1)    NOT NULL DEFAULT 0,
+    reference_id     INT           DEFAULT NULL,
+    reference_type   VARCHAR(60)   DEFAULT NULL,
+    created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (notification_id),
+    KEY idx_notif_user (user_id),
+    KEY idx_notif_read (is_read),
+    CONSTRAINT fk_notif_user FOREIGN KEY (user_id)
+        REFERENCES users (user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 18. EMAIL_LOGS
+-- ============================================================
+CREATE TABLE email_logs (
+    log_id          INT           NOT NULL AUTO_INCREMENT,
+    recipient_email VARCHAR(150)  NOT NULL,
+    subject         VARCHAR(255)  NOT NULL,
+    template_name   VARCHAR(100)  DEFAULT NULL,
+    status          ENUM('queued','sent','failed') NOT NULL DEFAULT 'queued',
+    sent_at         TIMESTAMP     DEFAULT NULL,
+    error_message   TEXT          DEFAULT NULL,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (log_id),
+    KEY idx_email_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 19. NOTIFICATION_PREFERENCES
+-- ============================================================
+CREATE TABLE notification_preferences (
+    pref_id        INT          NOT NULL AUTO_INCREMENT,
+    user_id        INT          NOT NULL,
+    event_type     VARCHAR(80)  NOT NULL,
+    email_enabled  TINYINT(1)   NOT NULL DEFAULT 1,
+    inapp_enabled  TINYINT(1)   NOT NULL DEFAULT 1,
+    PRIMARY KEY (pref_id),
+    UNIQUE KEY uq_pref_user_event (user_id, event_type),
+    CONSTRAINT fk_pref_user FOREIGN KEY (user_id)
+        REFERENCES users (user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 20. BOOKING_ANALYTICS
+-- ============================================================
+CREATE TABLE booking_analytics (
+    id                INT      NOT NULL AUTO_INCREMENT,
+    resource_id       INT      NOT NULL,
+    date              DATE     NOT NULL,
+    total_slots       TINYINT  NOT NULL DEFAULT 0,
+    booked_slots      TINYINT  NOT NULL DEFAULT 0,
+    utilisation_pct   DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    cancellation_count SMALLINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_analytics (resource_id, date),
+    CONSTRAINT fk_analytics_res FOREIGN KEY (resource_id)
+        REFERENCES resources (resource_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 21. REPORTS_CACHE
+-- ============================================================
+CREATE TABLE reports_cache (
+    cache_id              INT           NOT NULL AUTO_INCREMENT,
+    report_type           VARCHAR(80)   NOT NULL,
+    generated_by_user_id  INT           NOT NULL,
+    parameters_json       JSON          DEFAULT NULL,
+    result_json           LONGTEXT      DEFAULT NULL,
+    generated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at            TIMESTAMP     DEFAULT NULL,
+    PRIMARY KEY (cache_id),
+    KEY idx_cache_type    (report_type),
+    KEY idx_cache_expires (expires_at),
+    CONSTRAINT fk_cache_user FOREIGN KEY (generated_by_user_id)
+        REFERENCES users (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 22. AUDIT_LOG
+-- ============================================================
+CREATE TABLE audit_log (
+    log_id          BIGINT        NOT NULL AUTO_INCREMENT,
+    user_id         INT           DEFAULT NULL,
+    action          VARCHAR(60)   NOT NULL,
+    table_name      VARCHAR(80)   NOT NULL,
+    record_id       INT           DEFAULT NULL,
+    old_value_json  JSON          DEFAULT NULL,
+    new_value_json  JSON          DEFAULT NULL,
+    ip_address      VARCHAR(45)   DEFAULT NULL,
+    user_agent      VARCHAR(255)  DEFAULT NULL,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (log_id),
+    KEY idx_audit_user   (user_id),
+    KEY idx_audit_table  (table_name),
+    KEY idx_audit_ts     (created_at),
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id)
+        REFERENCES users (user_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 23. SESSIONS
+-- ============================================================
+CREATE TABLE sessions (
+    session_id   INT           NOT NULL AUTO_INCREMENT,
+    user_id      INT           NOT NULL,
+    token_hash   VARCHAR(255)  NOT NULL UNIQUE,
+    ip_address   VARCHAR(45)   DEFAULT NULL,
+    user_agent   VARCHAR(255)  DEFAULT NULL,
+    expires_at   TIMESTAMP     NOT NULL,
+    created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (session_id),
+    KEY idx_sess_user    (user_id),
+    KEY idx_sess_expires (expires_at),
+    CONSTRAINT fk_sess_user FOREIGN KEY (user_id)
+        REFERENCES users (user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 24. PASSWORD_RESET_TOKENS
+-- ============================================================
+CREATE TABLE password_reset_tokens (
+    token_id    INT           NOT NULL AUTO_INCREMENT,
+    user_id     INT           NOT NULL,
+    token_hash  VARCHAR(255)  NOT NULL UNIQUE,
+    expires_at  TIMESTAMP     NOT NULL,
+    used_at     TIMESTAMP     DEFAULT NULL,
+    created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (token_id),
+    KEY idx_prt_user    (user_id),
+    KEY idx_prt_expires (expires_at),
+    CONSTRAINT fk_prt_user FOREIGN KEY (user_id)
+        REFERENCES users (user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 25. SYSTEM_CONFIG
+-- ============================================================
+CREATE TABLE system_config (
+    config_id          INT           NOT NULL AUTO_INCREMENT,
+    config_key         VARCHAR(100)  NOT NULL UNIQUE,
+    config_value       TEXT          DEFAULT NULL,
+    data_type          ENUM('string','integer','boolean','json')
+                                     NOT NULL DEFAULT 'string',
+    description        VARCHAR(255)  DEFAULT NULL,
+    updated_by_user_id INT           DEFAULT NULL,
+    updated_at         TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (config_id),
+    CONSTRAINT fk_cfg_user FOREIGN KEY (updated_by_user_id)
+        REFERENCES users (user_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO system_config (config_key, config_value, data_type, description) VALUES
+    ('max_booking_duration_hrs',    '8',     'integer', 'Max consecutive hours a resource can be booked'),
+    ('advance_booking_days',        '30',    'integer', 'How many days in advance a booking can be made'),
+    ('booking_requires_approval',   'true',  'boolean', 'Whether all bookings go through an approval step'),
+    ('maintenance_alert_hours',     '24',    'integer', 'Hours before maintenance to alert affected bookers'),
+    ('session_timeout_minutes',     '60',    'integer', 'Idle session timeout in minutes'),
+    ('email_notifications_enabled', 'true',  'boolean', 'Master toggle for email notifications');
+
+-- ============================================================
+-- 26. HOLIDAYS
+-- ============================================================
+CREATE TABLE holidays (
+    holiday_id    INT           NOT NULL AUTO_INCREMENT,
+    date          DATE          NOT NULL,
+    name          VARCHAR(100)  NOT NULL,
+    is_recurring  TINYINT(1)    NOT NULL DEFAULT 0
+                                COMMENT '1 = repeats every year on same MM-DD',
+    PRIMARY KEY (holiday_id),
+    UNIQUE KEY uq_holiday_date (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- RE-ENABLE FK CHECKS
+-- ============================================================
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- QUICK REFERENCE — ALL 26 TABLES
+-- ============================================================
+-- Auth & RBAC        : roles, permissions, role_permissions, users, departments
+-- Resources          : resource_types, resources, resource_facilities, resource_images
+-- Bookings           : time_slots, bookings, booking_approvals,
+--                      booking_cancellations, recurring_bookings
+-- Maintenance        : maintenance_windows, maintenance_affected_bookings
+-- Notifications      : notifications, email_logs, notification_preferences
+-- Analytics          : booking_analytics, reports_cache
+-- Security & Audit   : audit_log, sessions, password_reset_tokens
+-- Config             : system_config, holidays
+-- ============================================================
