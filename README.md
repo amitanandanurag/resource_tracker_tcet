@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿# TCET Specialization Tracker
 
 A PHP + MySQL web application for managing students and role-based users (admin, coordinator, mentor, user) in a specialization tracking workflow.
@@ -75,3 +76,6 @@ A PHP + MySQL web application for managing students and role-based users (admin,
 
 No explicit license file is included in this repository.
 Add a `LICENSE` file if you plan to distribute this project.
+=======
+"# resource_tracker_tcet" 
+>>>>>>> c1f38db6e597dcbc50e6575d5afd763eeb74083c
