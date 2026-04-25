@@ -8,6 +8,7 @@ include_once("../database/db_connect.php");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TCET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         html, body {
             height: 100%;
@@ -68,68 +69,81 @@ include_once("../database/db_connect.php");
             align-items: center;
             height: 100%;
             width: 100%;
+            margin-left: auto;  
         }
 
         .bg-layer {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 40px;
-            border-radius: 10px;
-            color: #fff;
-        }
+    width: 320px;
+    height: 50%;              /* 👈 controls height */
+    min-height: 420px;        /* prevents it from becoming too small */
+    padding: 20px 18px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 
-        .bg-layer {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px 40px; /* Reduced vertical padding */
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            color: #fff;
-            margin: 20px 0; /* Adds space above and below the .bg-layer */
-        }
+    display: flex;            /* 👇 helps align content nicely */
+    flex-direction: column;
+    justify-content: center;  /* center content vertically */
 
-        .header-main {
+    text-align: center;
+    backdrop-filter: blur(12px);
+}
+
+       
+
+        /* .header-main {
             background: #34495e;
             padding: 20px;
             border-radius: 10px;
-        }
+        } */
 
-        .main-icon img {
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
+        .main-icon{
+    margin-top: -60px;
+}
 
         .school-name {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            font-family: 'Lucida Sans Unicode', sans-serif;
-        }
+    font-size: 20px;
+    font-weight: 600;
+    color: #6c4df6;
+    margin-bottom: 5px;
+}
 
-        .header-left-bottom {
+        /* .header-left-bottom {
             margin-top: 20px;
-        }
+        } */
+
+         .subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+}
 
         .icon1 {
-            margin-bottom: 15px;
-            position: relative;
-        }
+    margin-top: -15px;
+    margin-bottom: 12px;
+    text-align: left;
+}
 
+.icon1 label {
+    font-size: 14px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 6px;
+}
         .icon1 input {
-            width: 100%;
-            padding: 10px;
-            padding-left: 35px;
-            border: none;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: 0.3s;
+}
 
-        .icon1 i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #34495e;
-        }
+        .icon1 input:focus {
+    border-color: #6c4df6;
+    box-shadow: 0 0 5px rgba(108,77,246,0.3);
+}
 
         .login-check {
             text-align: left;
@@ -141,49 +155,54 @@ include_once("../database/db_connect.php");
         }
 
         .btn {
-            background: #1abc9c;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    width: 100%;
+    background: linear-gradient(135deg, #5f2c82, #8f00ff);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-        .btn:hover {
-            background: #16a085;
-        }
+.btn:hover {
+    opacity: 0.9;
+}
 
-        .copyright {
-            margin-top: 10px;
-        }
+/* FORGOT PASSWORD */
+.forgot {
+    margin-top: 10px;
+    font-size: 13px;
+}
 
-        .copyright a {
-            color: #ED2C02; /* Bright red */
-        }
+.forgot a {
+    color: #5f2c82;
+    text-decoration: none;
+}
 
-        .alert {
-            padding: 20px;
-            background-color: #f44336;
-            color: white;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
+.forgot a:hover {
+    text-decoration: underline;
+}
 
-        .closebtn {
-            margin-left: 15px;
-            color: white;
-            font-weight: bold;
-            float: right;
-            font-size: 22px;
-            line-height: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+/* ERROR */
+#error {
+    color: red;
+    font-size: 13px;
+    margin-top: 10px;
+}
 
-        .closebtn:hover {
-            color: black;
-        }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    body::before {
+        width: 100%;
+    }
+
+    .w3layouts-main {
+        width: 100%;
+        background: rgba(255,255,255,0.95);
+    }
+}
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="script/validation.min.js"></script>
@@ -212,40 +231,34 @@ include_once("../database/db_connect.php");
 
 <div class="w3layouts-main"> 
     <div class="bg-layer"><br/><br/><br/><br/><br/>
-        <div class="header-main">
+       
             <div class="main-icon">
                 <img src="images/school_logo.jpg" alt="logo" width='150px' height='150px'>
             </div>
             <div class="school-name">
-                SPECIALIZATION TRACKER
+                Resource Tracker
             </div>
-            <div class="header-left-bottom">
+            <div class="subtitle">Sign in to your account</div>
+            
                 <form id="login-form" method="post">
                     <div class="icon1">
-                        <i class="fa fa-user"></i>
-                        <input type="text" placeholder="Enter username" name="username" id="username" required=""/>
+                        <label>Username</label>
+                        <input type="text" placeholder="Enter your username" name="username" id="username" required>
                     </div>
                     <div class="icon1">
-                        <i class="fa fa-lock"></i>
-                        <input type="password" placeholder="Enter password" name="password" id="password" required=""/>
+                        <label>Password</label>
+                        <input type="password" placeholder="Enter your password" name="password" id="password" required>
                     </div>
-                    <div class="login-check">
-                        <label class="checkbox">
-                            <input type="checkbox" name="checkbox" checked="">
-                            <i></i> Keep me logged in
-                        </label>
-                    </div>
-                    <div id="error" style="color:red;"></div>
-                    <div class="bottom">
-                        <button type="submit" class="btn" name="login_button" id="login_button">Log In</button>
-                    </div>
+                     <button type="submit" class="btn" name="login_button" id="login_button">Login</button>
+
+            <div class="forgot">
+                <a href="#">Forgot password?</a>
+            </div>
+
+            <div id="error"></div>
                 </form> 
             </div>
-        </div>
-
-        <div class="copyright">
-            <p>© 2019. All rights reserved | Designed by <a href="https://dignityitsolution.com/" target="_blank">Dignity IT Solution</a></p>
-        </div>
+        
     </div>
 </div>
 
