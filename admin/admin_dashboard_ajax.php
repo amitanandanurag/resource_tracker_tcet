@@ -24,7 +24,7 @@ if (isset($_GET['action'])) {
                 ELSE 'N/A'
             END as mobile
         FROM dsms_student_master s
-        LEFT JOIN st_department_master d ON s.department_id = d.department_id
+        LEFT JOIN rt_department_master d ON s.department_id = d.department_id
         WHERE s.status = 0";
         
         if ($spec_id > 0) {

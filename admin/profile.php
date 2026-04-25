@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
     mysqli_begin_transaction($db_handle->conn);
     $ok = true;
 
-    $loginUpdateSql = "UPDATE st_login SET username = ? WHERE user_id = ? AND role_id = ?";
+    $loginUpdateSql = "UPDATE rt_login SET username = ? WHERE user_id = ? AND role_id = ?";
     $loginStmt = mysqli_prepare($db_handle->conn, $loginUpdateSql);
     if ($loginStmt) {
       mysqli_stmt_bind_param($loginStmt, 'sii', $profileName, $currentUserId, $currentRoleId);
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
     }
 
     if ($ok) {
-      $profileCheckSql = "SELECT user_id FROM st_user_master WHERE user_id = ? AND role_id = ? LIMIT 1";
+      $profileCheckSql = "SELECT user_id FROM rt_user_master WHERE user_id = ? AND role_id = ? LIMIT 1";
       $profileCheckStmt = mysqli_prepare($db_handle->conn, $profileCheckSql);
       if ($profileCheckStmt) {
         mysqli_stmt_bind_param($profileCheckStmt, 'ii', $currentUserId, $currentRoleId);
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
         mysqli_stmt_close($profileCheckStmt);
 
         if ($profileExists) {
-          $profileUpdateSql = "UPDATE st_user_master SET user_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
+          $profileUpdateSql = "UPDATE rt_user_master SET user_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
           $profileUpdateStmt = mysqli_prepare($db_handle->conn, $profileUpdateSql);
           if ($profileUpdateStmt) {
             mysqli_stmt_bind_param($profileUpdateStmt, 'sssii', $profileName, $profileEmail, $profilePhone, $currentUserId, $currentRoleId);
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
             $ok = false;
           }
         } else {
-          $profileInsertSql = "INSERT INTO st_user_master (user_id, user_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, 0, ?, 0)";
+          $profileInsertSql = "INSERT INTO rt_user_master (user_id, user_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, 0, ?, 0)";
           $profileInsertStmt = mysqli_prepare($db_handle->conn, $profileInsertSql);
           if ($profileInsertStmt) {
             mysqli_stmt_bind_param($profileInsertStmt, 'isssi', $currentUserId, $profileName, $profileEmail, $profilePhone, $currentRoleId);
@@ -100,10 +100,10 @@ $profileData = array(
 
 if ($currentUserId > 0 && $currentRoleId > 0) {
   $profileSql = "SELECT l.username, r.role_name, u.user_name, u.email_id, u.phone_number, d.department_name
-                 FROM st_login l
-                 LEFT JOIN st_role_master r ON r.role_id = l.role_id
-                 LEFT JOIN st_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id
-                 LEFT JOIN st_department_master d ON d.department_id = u.department_id
+                 FROM rt_login l
+                 LEFT JOIN rt_role_master r ON r.role_id = l.role_id
+                 LEFT JOIN rt_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id
+                 LEFT JOIN rt_department_master d ON d.department_id = u.department_id
                  WHERE l.user_id = ? AND l.role_id = ?
                  LIMIT 1";
   $profileStmt = mysqli_prepare($db_handle->conn, $profileSql);

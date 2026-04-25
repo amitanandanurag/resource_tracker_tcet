@@ -13,13 +13,13 @@ $columns = array(
 
 );
 
-$sql = "SELECT * FROM st_class_master where 1 ";
+$sql = "SELECT * FROM rt_class_master where 1 ";
 
 if (!empty($requestData['search']['value']))
 {
-     $sql .= " AND ( st_class_master.class_id LIKE '" . $requestData['search']['value'] . "%' ";
+     $sql .= " AND ( rt_class_master.class_id LIKE '" . $requestData['search']['value'] . "%' ";
     
-     $sql .= " OR st_class_master.class_name LIKE '" . $requestData['search']['value'] . "%') ";
+     $sql .= " OR rt_class_master.class_name LIKE '" . $requestData['search']['value'] . "%') ";
 }
 
 $result = $db_handle->query($sql);

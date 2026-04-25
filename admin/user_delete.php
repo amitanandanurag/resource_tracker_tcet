@@ -11,7 +11,7 @@ if ($userId <= 0) {
   exit;
 }
 
-$deleteSql = "DELETE FROM st_user_master WHERE user_id = $userId";
+$deleteSql = "DELETE FROM rt_user_master WHERE user_id = $userId";
 $ok = $db_handle->query($deleteSql);
 
 if ($ok) {

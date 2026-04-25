@@ -56,14 +56,14 @@ if (isset($_POST['save'])) {
     $status = 1;
 
     // Check if registration number already exists
-    $check_sql = "SELECT registration_no FROM st_student_master WHERE registration_no = '$registration_no'";
+    $check_sql = "SELECT registration_no FROM rt_student_master WHERE registration_no = '$registration_no'";
     $check_result = mysqli_query($db_handle->conn, $check_sql);
 
     if (mysqli_num_rows($check_result) > 0) {
         echo "<script>alert('Registration number already exists!');</script>";
     } else {
         // Insert into database
-        $sql = "INSERT INTO st_student_master (
+        $sql = "INSERT INTO rt_student_master (
                     academic_year, 
                     registration_no, 
                     class_id, 
