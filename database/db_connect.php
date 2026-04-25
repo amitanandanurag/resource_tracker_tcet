@@ -30,7 +30,7 @@ class DBController
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
     try {
-        $conn = mysqli_connect($this->host, $this->user, $this->password, $this->database, 3306);
+        $conn = mysqli_connect($this->host, $this->user, $this->password, $this->database, 3307);
         return $conn;
     } catch (Exception $e) {
         die("Database connection failed: " . $e->getMessage());
