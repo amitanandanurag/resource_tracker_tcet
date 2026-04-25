@@ -61,7 +61,7 @@ include_once("../database/db_connect.php");
         .img6 { background-image: url('../login/images/lab3.jpeg'); animation-delay: 25s; }
 
         /* 4. Main Layout */
-        .w3layouts-main {
+        /* .w3layouts-main {
             position: relative;
             z-index: 1;
             display: flex;
@@ -70,7 +70,7 @@ include_once("../database/db_connect.php");
             height: 100%;
             width: 100%;
             margin-left: auto;  
-        }
+        } */
 
         .bg-layer {
     width: 320px;

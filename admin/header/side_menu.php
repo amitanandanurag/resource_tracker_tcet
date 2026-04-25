@@ -12,9 +12,9 @@ function sidebar_has_column($conn, $table, $column)
 	return $exists;
 }
 
-$menuHasIconColumn = sidebar_has_column($db_handle->conn, 'st_menu_master', 'menu_icon');
-$subMenuHasIconColumn = sidebar_has_column($db_handle->conn, 'st_sub_menu_master', 'sub_menu_icon');
-$subMenuHasRouteColumn = sidebar_has_column($db_handle->conn, 'st_sub_menu_master', 'sub_menu_route');
+$menuHasIconColumn = sidebar_has_column($db_handle->conn, 'rt_menu_master', 'menu_icon');
+$subMenuHasIconColumn = sidebar_has_column($db_handle->conn, 'rt_sub_menu_master', 'sub_menu_icon');
+$subMenuHasRouteColumn = sidebar_has_column($db_handle->conn, 'rt_sub_menu_master', 'sub_menu_route');
 
 $menuTree = array();
 
@@ -50,36 +50,36 @@ function sidebar_seed_super_admin_settings($db_handle)
 		$icon = mysqli_real_escape_string($db_handle->conn, $item[1]);
 		$route = mysqli_real_escape_string($db_handle->conn, $item[2]);
 
-		$subSql = "SELECT sub_menu_id FROM st_sub_menu_master WHERE menu_id = {$menuId} AND (sub_menu_route = '$route' OR sub_menu_name = '$name') LIMIT 1";
+		$subSql = "SELECT sub_menu_id FROM rt_sub_menu_master WHERE menu_id = {$menuId} AND (sub_menu_route = '$route' OR sub_menu_name = '$name') LIMIT 1";
 		$subResult = mysqli_query($db_handle->conn, $subSql);
 		if (!$subResult || mysqli_num_rows($subResult) === 0) {
 			$nextOrder = 1;
-			$orderSql = "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM st_sub_menu_master WHERE menu_id = {$menuId}";
+			$orderSql = "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM rt_sub_menu_master WHERE menu_id = {$menuId}";
 			$orderResult = mysqli_query($db_handle->conn, $orderSql);
 			if ($orderResult && mysqli_num_rows($orderResult) > 0) {
 				$orderRow = mysqli_fetch_assoc($orderResult);
 				$nextOrder = (int) ($orderRow['next_order'] ?? 1);
 			}
-			$insertSql = "INSERT INTO st_sub_menu_master (menu_id, sort_order, sub_menu_name, sub_menu_icon, sub_menu_route) VALUES ({$menuId}, {$nextOrder}, '$name', '$icon', '$route')";
+			$insertSql = "INSERT INTO rt_sub_menu_master (menu_id, sort_order, sub_menu_name, sub_menu_icon, sub_menu_route) VALUES ({$menuId}, {$nextOrder}, '$name', '$icon', '$route')";
 			mysqli_query($db_handle->conn, $insertSql);
 		}
 	}
 
-	$parentSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$menuId} AND sub_menu_id IS NULL LIMIT 1";
+	$parentSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$menuId} AND sub_menu_id IS NULL LIMIT 1";
 	$parentResult = mysqli_query($db_handle->conn, $parentSql);
 	if (!$parentResult || mysqli_num_rows($parentResult) === 0) {
-		mysqli_query($db_handle->conn, "INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$menuId}, NULL)");
+		mysqli_query($db_handle->conn, "INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$menuId}, NULL)");
 	}
 
-	$settingsRows = mysqli_query($db_handle->conn, "SELECT sub_menu_id FROM st_sub_menu_master WHERE menu_id = {$menuId}");
+	$settingsRows = mysqli_query($db_handle->conn, "SELECT sub_menu_id FROM rt_sub_menu_master WHERE menu_id = {$menuId}");
 	if ($settingsRows) {
 		while ($settingRow = mysqli_fetch_assoc($settingsRows)) {
 			$subMenuId = (int) ($settingRow['sub_menu_id'] ?? 0);
 			if ($subMenuId > 0) {
-				$allocSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$menuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
+				$allocSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$menuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
 				$allocResult = mysqli_query($db_handle->conn, $allocSql);
 				if (!$allocResult || mysqli_num_rows($allocResult) === 0) {
-					mysqli_query($db_handle->conn, "INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$menuId}, {$subMenuId})");
+					mysqli_query($db_handle->conn, "INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$menuId}, {$subMenuId})");
 				}
 			}
 		}
@@ -88,14 +88,14 @@ function sidebar_seed_super_admin_settings($db_handle)
 
 function sidebar_resolve_system_menu_id($conn)
 {
-	$menuSql = "SELECT menu_id FROM st_menu_master WHERE LOWER(TRIM(menu_name)) IN ('settings', 'admin') ORDER BY CASE WHEN LOWER(TRIM(menu_name)) = 'settings' THEN 0 ELSE 1 END, menu_id ASC LIMIT 1";
+	$menuSql = "SELECT menu_id FROM rt_menu_master WHERE LOWER(TRIM(menu_name)) IN ('settings', 'admin') ORDER BY CASE WHEN LOWER(TRIM(menu_name)) = 'settings' THEN 0 ELSE 1 END, menu_id ASC LIMIT 1";
 	$menuResult = mysqli_query($conn, $menuSql);
 	if ($menuResult && mysqli_num_rows($menuResult) > 0) {
 		$menuRow = mysqli_fetch_assoc($menuResult);
 		return (int) ($menuRow['menu_id'] ?? 0);
 	}
 
-	$routeSql = "SELECT menu_id FROM st_sub_menu_master WHERE sub_menu_route IN ('allocation_master.php', 'profile.php', 'change_password.php') ORDER BY menu_id ASC, sort_order ASC, sub_menu_id ASC LIMIT 1";
+	$routeSql = "SELECT menu_id FROM rt_sub_menu_master WHERE sub_menu_route IN ('allocation_master.php', 'profile.php', 'change_password.php') ORDER BY menu_id ASC, sort_order ASC, sub_menu_id ASC LIMIT 1";
 	$routeResult = mysqli_query($conn, $routeSql);
 	if ($routeResult && mysqli_num_rows($routeResult) > 0) {
 		$routeRow = mysqli_fetch_assoc($routeResult);
@@ -110,18 +110,18 @@ if ((int) $usertype === 1) {
 }
 
 $menuSql = "SELECT m.menu_id, m.menu_name, $menuIconSelect
-			FROM st_menu_master m
+			FROM rt_menu_master m
 			WHERE (
 				EXISTS (
 					SELECT 1
-					FROM st_menu_allocation_master mar
+					FROM rt_menu_allocation_master mar
 					WHERE mar.menu_id = m.menu_id
 					  AND mar.role_id = ?
 					  AND mar.sub_menu_id IS NULL
 				)
 				OR EXISTS (
 					SELECT 1
-					FROM st_menu_allocation_master maa
+					FROM rt_menu_allocation_master maa
 					WHERE maa.menu_id = m.menu_id
 					  AND maa.role_id = ?
 					  AND maa.sub_menu_id IS NOT NULL
@@ -144,12 +144,12 @@ if ($menuStmt) {
 		);
 
 		$subSql = "SELECT sm.sub_menu_id, sm.sub_menu_name, $subMenuRouteSelect, $subMenuIconSelect
-				   FROM st_sub_menu_master sm
+				   FROM rt_sub_menu_master sm
 				   WHERE sm.menu_id = ?
 				   AND (
 					   EXISTS (
 						   SELECT 1
-						   FROM st_menu_allocation_master mar
+						   FROM rt_menu_allocation_master mar
 						   WHERE mar.sub_menu_id = sm.sub_menu_id
 							 AND mar.role_id = ?
 					   )

@@ -10,7 +10,7 @@ if (isset($_SESSION['user_session'])) {
 
 $db_handle = new DBController();
 
-$sql = "SELECT * FROM st_login WHERE login_id='" . $_SESSION['user_session'] . "'";
+$sql = "SELECT * FROM rt_login WHERE login_id='" . $_SESSION['user_session'] . "'";
 $result = mysqli_query($db_handle->conn, $sql) or die("database error:" . mysqli_error($db_handle->conn));
 while ($row = $result->fetch_assoc()) {
 	$username = $row['username'];
@@ -19,7 +19,7 @@ while ($row = $result->fetch_assoc()) {
 	$name = $row['username'];
 }
 
-$sql = "SELECT * FROM st_role_master WHERE role_id='" . $usertype . "'";
+$sql = "SELECT * FROM rt_role_master WHERE role_id='" . $usertype . "'";
 $result = mysqli_query($db_handle->conn, $sql) or die("database error:" . mysqli_error($db_handle->conn));
 while ($row = $result->fetch_assoc()) {
 	$role_name = $row['role_name'];
