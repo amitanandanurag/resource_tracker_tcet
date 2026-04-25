@@ -26,17 +26,16 @@ class DBController
     }
 
     function connectDB()
-    {
-      mysqli_report(MYSQLI_REPORT_OFF);
-      $conn = @mysqli_connect($this->host,$this->user,$this->password,$this->database);
+{
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-      if (!$conn) {
-        $this->last_error = 'Unable to connect with database';
-        return false;
-      }
-
-      return $conn;
+    try {
+        $conn = mysqli_connect($this->host, $this->user, $this->password, $this->database, 3307);
+        return $conn;
+    } catch (Exception $e) {
+        die("Database connection failed: " . $e->getMessage());
     }
+}
 
     function runQuery($query) {
         $result = mysqli_query($this->conn,$query);
