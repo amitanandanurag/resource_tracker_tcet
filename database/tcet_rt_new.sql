@@ -1,0 +1,1000 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3307
+-- Generation Time: Apr 26, 2026 at 02:36 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `tcet_rt`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_audit_log`
+--
+
+CREATE TABLE `rt_audit_log` (
+  `audit_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action_type` varchar(100) NOT NULL,
+  `affected_table` varchar(100) DEFAULT NULL,
+  `affected_record` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `performed_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_bookings`
+--
+
+CREATE TABLE `rt_bookings` (
+  `booking_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `booked_by_user_id` int(11) NOT NULL,
+  `department_id` int(11) NOT NULL,
+  `class_id` int(11) NOT NULL,
+  `division_id` int(11) NOT NULL,
+  `booking_date` date NOT NULL,
+  `slot_id` int(11) NOT NULL,
+  `purpose` varchar(255) DEFAULT NULL,
+  `status` enum('pending','approved','rejected','cancelled','completed') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_booking_analytics`
+--
+
+CREATE TABLE `rt_booking_analytics` (
+  `id` int(11) NOT NULL,
+  `resource_id` int(11) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `total_slots` int(11) DEFAULT 0,
+  `booked_slots` int(11) DEFAULT 0,
+  `utilisation_pct` decimal(5,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_booking_approvals`
+--
+
+CREATE TABLE `rt_booking_approvals` (
+  `approval_id` int(11) NOT NULL,
+  `booking_id` int(11) DEFAULT NULL,
+  `approver_user_id` int(11) NOT NULL,
+  `decision` enum('approved','rejected') NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `decided_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_booking_cancellations`
+--
+
+CREATE TABLE `rt_booking_cancellations` (
+  `cancellation_id` int(11) NOT NULL,
+  `booking_id` int(11) DEFAULT NULL,
+  `cancelled_by_user_id` int(11) NOT NULL,
+  `reason` text DEFAULT NULL,
+  `cancelled_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_class_master`
+--
+
+CREATE TABLE `rt_class_master` (
+  `class_id` int(11) NOT NULL,
+  `class_name` varchar(50) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_class_master`
+--
+
+INSERT INTO `rt_class_master` (`class_id`, `class_name`, `date`) VALUES
+(1, 'FY', '2026-04-16 08:46:58'),
+(2, 'SY', '2026-04-16 08:46:58'),
+(3, 'TY', '2026-04-16 08:46:58'),
+(4, 'FE', '2026-04-16 08:46:58'),
+(5, 'SE', '2026-04-16 08:46:58'),
+(6, 'TE', '2026-04-16 08:46:58'),
+(7, 'BE', '2026-04-16 08:46:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_department_master`
+--
+
+CREATE TABLE `rt_department_master` (
+  `department_id` int(11) NOT NULL,
+  `department_name` varchar(150) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_department_master`
+--
+
+INSERT INTO `rt_department_master` (`department_id`, `department_name`, `date`) VALUES
+(1, 'MCA', '2026-04-22 10:19:07'),
+(2, 'AIML', '2026-04-16 09:31:31'),
+(3, 'CE', '2026-04-22 10:16:32'),
+(4, 'IT', '2026-04-22 10:16:38'),
+(5, 'EXTC', '2026-04-22 10:16:45'),
+(6, 'ECS', '2026-04-22 10:18:15'),
+(7, 'MECH', '2026-04-22 10:18:15'),
+(8, 'CIVIL', '2026-04-22 10:18:15'),
+(9, 'CSE-CS', '2026-04-22 10:18:15'),
+(10, 'MME', '2026-04-22 10:18:15'),
+(11, 'BCA', '2026-04-22 10:19:55'),
+(12, 'AIDS', '2026-04-22 10:19:55'),
+(13, 'IOT', '2026-04-22 10:19:55');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_division_master`
+--
+
+CREATE TABLE `rt_division_master` (
+  `division_id` int(11) NOT NULL,
+  `division_name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_division_master`
+--
+
+INSERT INTO `rt_division_master` (`division_id`, `division_name`) VALUES
+(1, 'A'),
+(2, 'B'),
+(3, 'C'),
+(4, 'D'),
+(5, 'E'),
+(6, 'F');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_login`
+--
+
+CREATE TABLE `rt_login` (
+  `login_id` int(11) NOT NULL,
+  `username` varchar(200) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_login`
+--
+
+INSERT INTO `rt_login` (`login_id`, `username`, `password`, `role_id`, `user_id`, `created_at`) VALUES
+(1, 'superadmin@tcetmumbai.in', 'Amit@1234', 1, 1, '2026-04-23 09:44:44'),
+(2, 'admin@tcetmumbai.in', 'Amit@1234', 2, 2, '2026-04-23 09:45:37'),
+(3, 'coordinator@tcetmumbai.in', 'Amit@1234', 3, 3, '2026-04-23 09:48:36'),
+(4, 'mentor@tcetmumbai.in', 'Amit@1234', 4, 4, '2026-04-23 09:48:36'),
+(5, 'student@tcetmumbai.in', 'Amit@1234', 5, 5, '2026-04-23 09:50:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_maintenance_windows`
+--
+
+CREATE TABLE `rt_maintenance_windows` (
+  `maintenance_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime NOT NULL,
+  `reason` text DEFAULT NULL,
+  `created_by_user_id` int(11) NOT NULL,
+  `status` enum('scheduled','ongoing','completed','cancelled') DEFAULT 'scheduled',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_menu_allocation_master`
+--
+
+CREATE TABLE `rt_menu_allocation_master` (
+  `menu_allocation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `sub_menu_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_menu_allocation_master`
+--
+
+INSERT INTO `rt_menu_allocation_master` (`menu_allocation_id`, `user_id`, `role_id`, `menu_id`, `sub_menu_id`) VALUES
+(1, 0, 1, 1, NULL),
+(2, 0, 1, 1, 1),
+(3, 0, 1, 1, 2),
+(6, 0, 1, 1, 5),
+(7, 0, 1, 2, NULL),
+(25, 0, 1, 3, NULL),
+(32, 0, 1, 3, 7),
+(36, 0, 1, 3, 8),
+(47, 0, 1, 4, NULL),
+(54, 0, 1, 4, 9),
+(58, 0, 1, 4, 10),
+(69, 0, 1, 5, NULL),
+(76, 0, 1, 5, 11),
+(80, 0, 1, 5, 12),
+(93, 0, 1, 2, 13),
+(147, 0, 1, 2, 20),
+(148, 0, 1, 2, 21),
+(149, 0, 1, 2, 22),
+(150, 0, 1, 2, 23),
+(151, 0, 1, 2, 24),
+(152, 0, 1, 2, 25),
+(153, 0, 1, 5, 13),
+(154, 0, 1, 5, 20),
+(155, 0, 1, 5, 21),
+(156, 0, 1, 5, 23),
+(157, 0, 1, 5, 24),
+(158, 0, 1, 5, 25),
+(159, 0, 1, 5, 46),
+(240, 0, 5, 1, 1),
+(241, 0, 5, 1, NULL),
+(256, 0, 2, 1, 1),
+(257, 0, 2, 1, NULL),
+(258, 0, 2, 1, 2),
+(259, 0, 2, 1, 5),
+(260, 0, 2, 3, 9),
+(261, 0, 2, 3, NULL),
+(262, 0, 2, 3, 10),
+(263, 0, 2, 4, 11),
+(264, 0, 2, 4, NULL),
+(265, 0, 2, 4, 12),
+(266, 0, 2, 5, 13),
+(267, 0, 2, 5, NULL),
+(268, 0, 2, 5, 20),
+(269, 0, 2, 5, 21),
+(270, 0, 3, 1, 1),
+(271, 0, 3, 1, NULL),
+(272, 0, 3, 1, 2),
+(273, 0, 3, 1, 5),
+(274, 0, 3, 4, 11),
+(275, 0, 3, 4, NULL),
+(276, 0, 3, 4, 12),
+(277, 0, 3, 5, 20),
+(278, 0, 3, 5, NULL),
+(279, 0, 3, 5, 21),
+(280, 0, 4, 1, 2),
+(281, 0, 4, 1, NULL),
+(282, 0, 4, 1, 5),
+(283, 0, 4, 5, 20),
+(284, 0, 4, 5, NULL),
+(285, 0, 4, 5, 21),
+(286, 0, 1, 5, 47);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_menu_master`
+--
+
+CREATE TABLE `rt_menu_master` (
+  `menu_id` int(11) NOT NULL,
+  `menu_name` varchar(100) NOT NULL,
+  `menu_icon` varchar(100) NOT NULL DEFAULT 'fa fa-folder'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_menu_master`
+--
+
+INSERT INTO `rt_menu_master` (`menu_id`, `menu_name`, `menu_icon`) VALUES
+(1, 'Students', 'fa fa-graduation-cap'),
+(2, 'Admin', 'fa fa-cogs'),
+(3, 'coordinator', 'fa fa-user-secret'),
+(4, 'mentor', 'fa fa-users'),
+(5, 'Settings', 'fa fa-user');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_notifications`
+--
+
+CREATE TABLE `rt_notifications` (
+  `notification_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(150) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_permissions`
+--
+
+CREATE TABLE `rt_permissions` (
+  `permission_id` int(11) NOT NULL,
+  `module` varchar(50) DEFAULT NULL,
+  `action` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_recurring_bookings`
+--
+
+CREATE TABLE `rt_recurring_bookings` (
+  `recurring_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `booked_by_user_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  `division_id` int(11) DEFAULT NULL,
+  `slot_id` int(11) NOT NULL,
+  `recurrence_type` enum('daily','weekly') DEFAULT 'weekly',
+  `day_of_week` int(11) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `status` enum('active','cancelled') DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_resources`
+--
+
+CREATE TABLE `rt_resources` (
+  `resource_id` int(11) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `type_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `capacity` int(11) DEFAULT 0,
+  `building` varchar(100) DEFAULT NULL,
+  `floor` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_resource_facilities`
+--
+
+CREATE TABLE `rt_resource_facilities` (
+  `facility_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `facility_name` varchar(100) DEFAULT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `is_working` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_resource_images`
+--
+
+CREATE TABLE `rt_resource_images` (
+  `image_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  `image_url` varchar(255) NOT NULL,
+  `is_primary` tinyint(1) DEFAULT 0,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_resource_types`
+--
+
+CREATE TABLE `rt_resource_types` (
+  `type_id` int(11) NOT NULL,
+  `type_name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_role_master`
+--
+
+CREATE TABLE `rt_role_master` (
+  `role_id` int(11) NOT NULL,
+  `role_name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_role_master`
+--
+
+INSERT INTO `rt_role_master` (`role_id`, `role_name`) VALUES
+(1, 'SUPER ADMIN'),
+(2, 'ADMIN'),
+(3, 'COORDINATOR / HOD'),
+(4, 'MENTOR'),
+(5, 'STUDENT');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_role_permissions`
+--
+
+CREATE TABLE `rt_role_permissions` (
+  `id` int(11) NOT NULL,
+  `role_id` int(11) DEFAULT NULL,
+  `permission_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_sub_menu_master`
+--
+
+CREATE TABLE `rt_sub_menu_master` (
+  `sub_menu_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `sub_menu_name` varchar(100) NOT NULL,
+  `sub_menu_icon` varchar(100) NOT NULL DEFAULT 'fa fa-angle-double-right',
+  `sub_menu_route` varchar(255) NOT NULL DEFAULT '#'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_sub_menu_master`
+--
+
+INSERT INTO `rt_sub_menu_master` (`sub_menu_id`, `menu_id`, `sort_order`, `sub_menu_name`, `sub_menu_icon`, `sub_menu_route`) VALUES
+(1, 1, 1, 'Register Students', 'fa fa-plus', 'student_admission.php'),
+(2, 1, 2, 'List of Students', 'fa fa-info-circle', 'student-info.php'),
+(5, 1, 3, 'Concise Details', 'fa fa-info-circle', 'student_concise_details.php'),
+(7, 2, 1, 'Register Admin', 'fa fa-plus', 'admin_register.php'),
+(8, 2, 2, 'Admin Info', 'fa fa-info-circle', 'admin_info.php'),
+(9, 3, 1, 'Register Coordinator', 'fa fa-plus', 'coordinator_register.php'),
+(10, 3, 2, 'Coordinator Info', 'fa fa-info-circle', 'coordinator_info.php'),
+(11, 4, 1, 'Register Mentor', 'fa fa-plus', 'mentor_register.php'),
+(12, 4, 2, 'Mentor Info', 'fa fa-info-circle', 'mentor_info.php'),
+(13, 5, 1, 'Masters', 'fa fa-cog', 'class_crud_new.php#section-list'),
+(20, 5, 2, 'Profile', 'fa fa-user', 'profile.php'),
+(21, 5, 3, 'Update Password', 'fa fa-folder', 'change_password.php'),
+(23, 5, 5, 'Menu', 'fa fa-folder', 'class_crud_new.php?tab=menu-list'),
+(24, 5, 6, 'Sub Menu', 'fa fa-folder', 'class_crud_new.php?tab=sub-menu-list'),
+(25, 5, 7, 'Side Menu Allocation', 'fa fa-check-square-o', 'allocation_master.php'),
+(46, 5, 4, 'Manage Section', 'fa fa-list-alt', 'class_crud_new.php?tab=section-list'),
+(47, 5, 8, 'Offline Marks Entry', 'fa fa-pencil-square-o', 'offline_marks_entry.php');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_time_slots`
+--
+
+CREATE TABLE `rt_time_slots` (
+  `slot_id` int(11) NOT NULL,
+  `label` varchar(50) NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_time_slots`
+--
+
+INSERT INTO `rt_time_slots` (`slot_id`, `label`, `start_time`, `end_time`, `is_active`) VALUES
+(1, '7:30 AM - 8:30 AM', '07:30:00', '08:30:00', 1),
+(2, '8:30 AM - 9:30 AM', '08:30:00', '09:30:00', 1),
+(3, '9:30 AM - 10:30 AM', '09:30:00', '10:30:00', 1),
+(4, '10:30 AM - 11:30 AM', '10:30:00', '11:30:00', 1),
+(5, '11:30 AM - 12:30 PM', '11:30:00', '12:30:00', 1),
+(6, '12:30 PM - 1:30 PM', '12:30:00', '13:30:00', 1),
+(7, '1:30 PM - 2:30 PM', '13:30:00', '14:30:00', 1),
+(8, '2:30 PM - 3:30 PM', '14:30:00', '15:30:00', 1),
+(9, '3:30 PM - 4:30 PM', '15:30:00', '16:30:00', 1),
+(10, '4:30 PM - 5:30 PM', '16:30:00', '17:30:00', 1),
+(11, '5:30 PM - 6:30 PM', '17:30:00', '18:30:00', 1),
+(12, '6:30 PM - 7:30 PM', '18:30:00', '19:30:00', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_user_log_master`
+--
+
+CREATE TABLE `rt_user_log_master` (
+  `user_log_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rt_user_master`
+--
+
+CREATE TABLE `rt_user_master` (
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(150) NOT NULL,
+  `email_id` varchar(200) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `department_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_user_master`
+--
+
+INSERT INTO `rt_user_master` (`user_id`, `user_name`, `email_id`, `phone_number`, `department_id`, `role_id`, `student_id`) VALUES
+(1, 'Anurag Mishra', 'amit@tcetmumbai.in', '8080590516', 1, 1, 0),
+(2, 'Amit Kumar', 'anurag@tcetmumbai.in', '8080590516', 1, 2, 0),
+(3, 'Ashutosh Pandey', 'asdf@tcetmumbai.in', '234', 2, 2, 0);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `rt_audit_log`
+--
+ALTER TABLE `rt_audit_log`
+  ADD PRIMARY KEY (`audit_id`);
+
+--
+-- Indexes for table `rt_bookings`
+--
+ALTER TABLE `rt_bookings`
+  ADD PRIMARY KEY (`booking_id`),
+  ADD UNIQUE KEY `unique_booking` (`resource_id`,`booking_date`,`slot_id`),
+  ADD KEY `booked_by_user_id` (`booked_by_user_id`),
+  ADD KEY `department_id` (`department_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `division_id` (`division_id`),
+  ADD KEY `slot_id` (`slot_id`);
+
+--
+-- Indexes for table `rt_booking_analytics`
+--
+ALTER TABLE `rt_booking_analytics`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `resource_id` (`resource_id`);
+
+--
+-- Indexes for table `rt_booking_approvals`
+--
+ALTER TABLE `rt_booking_approvals`
+  ADD PRIMARY KEY (`approval_id`),
+  ADD UNIQUE KEY `booking_id` (`booking_id`),
+  ADD KEY `approver_user_id` (`approver_user_id`);
+
+--
+-- Indexes for table `rt_booking_cancellations`
+--
+ALTER TABLE `rt_booking_cancellations`
+  ADD PRIMARY KEY (`cancellation_id`),
+  ADD UNIQUE KEY `booking_id` (`booking_id`),
+  ADD KEY `cancelled_by_user_id` (`cancelled_by_user_id`);
+
+--
+-- Indexes for table `rt_class_master`
+--
+ALTER TABLE `rt_class_master`
+  ADD PRIMARY KEY (`class_id`);
+
+--
+-- Indexes for table `rt_department_master`
+--
+ALTER TABLE `rt_department_master`
+  ADD PRIMARY KEY (`department_id`);
+
+--
+-- Indexes for table `rt_division_master`
+--
+ALTER TABLE `rt_division_master`
+  ADD PRIMARY KEY (`division_id`);
+
+--
+-- Indexes for table `rt_login`
+--
+ALTER TABLE `rt_login`
+  ADD PRIMARY KEY (`login_id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- Indexes for table `rt_maintenance_windows`
+--
+ALTER TABLE `rt_maintenance_windows`
+  ADD PRIMARY KEY (`maintenance_id`),
+  ADD KEY `resource_id` (`resource_id`),
+  ADD KEY `created_by_user_id` (`created_by_user_id`);
+
+--
+-- Indexes for table `rt_menu_allocation_master`
+--
+ALTER TABLE `rt_menu_allocation_master`
+  ADD PRIMARY KEY (`menu_allocation_id`);
+
+--
+-- Indexes for table `rt_menu_master`
+--
+ALTER TABLE `rt_menu_master`
+  ADD PRIMARY KEY (`menu_id`);
+
+--
+-- Indexes for table `rt_notifications`
+--
+ALTER TABLE `rt_notifications`
+  ADD PRIMARY KEY (`notification_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `rt_permissions`
+--
+ALTER TABLE `rt_permissions`
+  ADD PRIMARY KEY (`permission_id`);
+
+--
+-- Indexes for table `rt_recurring_bookings`
+--
+ALTER TABLE `rt_recurring_bookings`
+  ADD PRIMARY KEY (`recurring_id`),
+  ADD KEY `resource_id` (`resource_id`),
+  ADD KEY `booked_by_user_id` (`booked_by_user_id`),
+  ADD KEY `slot_id` (`slot_id`);
+
+--
+-- Indexes for table `rt_resources`
+--
+ALTER TABLE `rt_resources`
+  ADD PRIMARY KEY (`resource_id`),
+  ADD UNIQUE KEY `code` (`code`),
+  ADD KEY `type_id` (`type_id`),
+  ADD KEY `department_id` (`department_id`);
+
+--
+-- Indexes for table `rt_resource_facilities`
+--
+ALTER TABLE `rt_resource_facilities`
+  ADD PRIMARY KEY (`facility_id`),
+  ADD KEY `resource_id` (`resource_id`);
+
+--
+-- Indexes for table `rt_resource_images`
+--
+ALTER TABLE `rt_resource_images`
+  ADD PRIMARY KEY (`image_id`),
+  ADD KEY `resource_id` (`resource_id`);
+
+--
+-- Indexes for table `rt_resource_types`
+--
+ALTER TABLE `rt_resource_types`
+  ADD PRIMARY KEY (`type_id`),
+  ADD UNIQUE KEY `type_name` (`type_name`);
+
+--
+-- Indexes for table `rt_role_master`
+--
+ALTER TABLE `rt_role_master`
+  ADD PRIMARY KEY (`role_id`);
+
+--
+-- Indexes for table `rt_role_permissions`
+--
+ALTER TABLE `rt_role_permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `role_id` (`role_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
+-- Indexes for table `rt_sub_menu_master`
+--
+ALTER TABLE `rt_sub_menu_master`
+  ADD PRIMARY KEY (`sub_menu_id`);
+
+--
+-- Indexes for table `rt_time_slots`
+--
+ALTER TABLE `rt_time_slots`
+  ADD PRIMARY KEY (`slot_id`);
+
+--
+-- Indexes for table `rt_user_log_master`
+--
+ALTER TABLE `rt_user_log_master`
+  ADD PRIMARY KEY (`user_log_id`);
+
+--
+-- Indexes for table `rt_user_master`
+--
+ALTER TABLE `rt_user_master`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `email_id` (`email_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `rt_audit_log`
+--
+ALTER TABLE `rt_audit_log`
+  MODIFY `audit_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_bookings`
+--
+ALTER TABLE `rt_bookings`
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_booking_analytics`
+--
+ALTER TABLE `rt_booking_analytics`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_booking_approvals`
+--
+ALTER TABLE `rt_booking_approvals`
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_booking_cancellations`
+--
+ALTER TABLE `rt_booking_cancellations`
+  MODIFY `cancellation_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_class_master`
+--
+ALTER TABLE `rt_class_master`
+  MODIFY `class_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `rt_department_master`
+--
+ALTER TABLE `rt_department_master`
+  MODIFY `department_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `rt_division_master`
+--
+ALTER TABLE `rt_division_master`
+  MODIFY `division_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `rt_login`
+--
+ALTER TABLE `rt_login`
+  MODIFY `login_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `rt_maintenance_windows`
+--
+ALTER TABLE `rt_maintenance_windows`
+  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_menu_allocation_master`
+--
+ALTER TABLE `rt_menu_allocation_master`
+  MODIFY `menu_allocation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=287;
+
+--
+-- AUTO_INCREMENT for table `rt_menu_master`
+--
+ALTER TABLE `rt_menu_master`
+  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `rt_notifications`
+--
+ALTER TABLE `rt_notifications`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_permissions`
+--
+ALTER TABLE `rt_permissions`
+  MODIFY `permission_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_recurring_bookings`
+--
+ALTER TABLE `rt_recurring_bookings`
+  MODIFY `recurring_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_resources`
+--
+ALTER TABLE `rt_resources`
+  MODIFY `resource_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_resource_facilities`
+--
+ALTER TABLE `rt_resource_facilities`
+  MODIFY `facility_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_resource_images`
+--
+ALTER TABLE `rt_resource_images`
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_resource_types`
+--
+ALTER TABLE `rt_resource_types`
+  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_role_master`
+--
+ALTER TABLE `rt_role_master`
+  MODIFY `role_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `rt_role_permissions`
+--
+ALTER TABLE `rt_role_permissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_sub_menu_master`
+--
+ALTER TABLE `rt_sub_menu_master`
+  MODIFY `sub_menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+
+--
+-- AUTO_INCREMENT for table `rt_time_slots`
+--
+ALTER TABLE `rt_time_slots`
+  MODIFY `slot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `rt_user_log_master`
+--
+ALTER TABLE `rt_user_log_master`
+  MODIFY `user_log_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rt_user_master`
+--
+ALTER TABLE `rt_user_master`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `rt_bookings`
+--
+ALTER TABLE `rt_bookings`
+  ADD CONSTRAINT `rt_bookings_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`),
+  ADD CONSTRAINT `rt_bookings_ibfk_2` FOREIGN KEY (`booked_by_user_id`) REFERENCES `rt_user_master` (`user_id`),
+  ADD CONSTRAINT `rt_bookings_ibfk_3` FOREIGN KEY (`department_id`) REFERENCES `rt_department_master` (`department_id`),
+  ADD CONSTRAINT `rt_bookings_ibfk_4` FOREIGN KEY (`class_id`) REFERENCES `rt_class_master` (`class_id`),
+  ADD CONSTRAINT `rt_bookings_ibfk_5` FOREIGN KEY (`division_id`) REFERENCES `rt_division_master` (`division_id`),
+  ADD CONSTRAINT `rt_bookings_ibfk_6` FOREIGN KEY (`slot_id`) REFERENCES `rt_time_slots` (`slot_id`);
+
+--
+-- Constraints for table `rt_booking_analytics`
+--
+ALTER TABLE `rt_booking_analytics`
+  ADD CONSTRAINT `rt_booking_analytics_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rt_booking_approvals`
+--
+ALTER TABLE `rt_booking_approvals`
+  ADD CONSTRAINT `rt_booking_approvals_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `rt_bookings` (`booking_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `rt_booking_approvals_ibfk_2` FOREIGN KEY (`approver_user_id`) REFERENCES `rt_user_master` (`user_id`);
+
+--
+-- Constraints for table `rt_booking_cancellations`
+--
+ALTER TABLE `rt_booking_cancellations`
+  ADD CONSTRAINT `rt_booking_cancellations_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `rt_bookings` (`booking_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `rt_booking_cancellations_ibfk_2` FOREIGN KEY (`cancelled_by_user_id`) REFERENCES `rt_user_master` (`user_id`);
+
+--
+-- Constraints for table `rt_maintenance_windows`
+--
+ALTER TABLE `rt_maintenance_windows`
+  ADD CONSTRAINT `rt_maintenance_windows_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`),
+  ADD CONSTRAINT `rt_maintenance_windows_ibfk_2` FOREIGN KEY (`created_by_user_id`) REFERENCES `rt_user_master` (`user_id`);
+
+--
+-- Constraints for table `rt_notifications`
+--
+ALTER TABLE `rt_notifications`
+  ADD CONSTRAINT `rt_notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `rt_user_master` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rt_recurring_bookings`
+--
+ALTER TABLE `rt_recurring_bookings`
+  ADD CONSTRAINT `rt_recurring_bookings_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`),
+  ADD CONSTRAINT `rt_recurring_bookings_ibfk_2` FOREIGN KEY (`booked_by_user_id`) REFERENCES `rt_user_master` (`user_id`),
+  ADD CONSTRAINT `rt_recurring_bookings_ibfk_3` FOREIGN KEY (`slot_id`) REFERENCES `rt_time_slots` (`slot_id`);
+
+--
+-- Constraints for table `rt_resources`
+--
+ALTER TABLE `rt_resources`
+  ADD CONSTRAINT `rt_resources_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `rt_resource_types` (`type_id`),
+  ADD CONSTRAINT `rt_resources_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `rt_department_master` (`department_id`);
+
+--
+-- Constraints for table `rt_resource_facilities`
+--
+ALTER TABLE `rt_resource_facilities`
+  ADD CONSTRAINT `rt_resource_facilities_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rt_resource_images`
+--
+ALTER TABLE `rt_resource_images`
+  ADD CONSTRAINT `rt_resource_images_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `rt_resources` (`resource_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rt_role_permissions`
+--
+ALTER TABLE `rt_role_permissions`
+  ADD CONSTRAINT `rt_role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `rt_role_master` (`role_id`),
+  ADD CONSTRAINT `rt_role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `rt_permissions` (`permission_id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
