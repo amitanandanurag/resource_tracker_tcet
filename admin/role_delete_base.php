@@ -10,7 +10,7 @@ if ($userId <= 0) {
   exit;
 }
 
-$sql = "DELETE FROM st_user_master WHERE user_id = $userId AND role_id = " . intval($roleId);
+$sql = "DELETE FROM rt_user_master WHERE user_id = $userId AND role_id = " . intval($roleId);
 $ok = $db_handle->query($sql);
 
 if ($ok) {

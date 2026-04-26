@@ -12,14 +12,14 @@ $db = new DBController();
 
 function resolve_system_menu_id($db)
 {
-  $menuSql = "SELECT menu_id, menu_name FROM st_menu_master WHERE LOWER(TRIM(menu_name)) IN ('settings', 'admin') ORDER BY CASE WHEN LOWER(TRIM(menu_name)) = 'settings' THEN 0 ELSE 1 END, menu_id ASC LIMIT 1";
+  $menuSql = "SELECT menu_id, menu_name FROM rt_menu_master WHERE LOWER(TRIM(menu_name)) IN ('settings', 'admin') ORDER BY CASE WHEN LOWER(TRIM(menu_name)) = 'settings' THEN 0 ELSE 1 END, menu_id ASC LIMIT 1";
   $menuRows = $db->runQuery($menuSql) ?? array();
   if (!empty($menuRows) && isset($menuRows[0]['menu_id'])) {
     return (int) $menuRows[0]['menu_id'];
   }
 
   $routeSql = "SELECT sm.menu_id
-               FROM st_sub_menu_master sm
+               FROM rt_sub_menu_master sm
                WHERE sm.sub_menu_route IN ('allocation_master.php', 'profile.php', 'change_password.php')
                ORDER BY sm.menu_id ASC, sm.sort_order ASC, sm.sub_menu_id ASC
                LIMIT 1";
@@ -52,25 +52,25 @@ function ensure_system_setting_submenus($db, $systemMenuId)
     $icon = mysqli_real_escape_string($db->conn, $item[1]);
     $route = mysqli_real_escape_string($db->conn, $item[2]);
 
-    $existsSql = "SELECT sub_menu_id FROM st_sub_menu_master WHERE menu_id = {$systemMenuId} AND (sub_menu_route = '$route' OR sub_menu_name = '$name') LIMIT 1";
+    $existsSql = "SELECT sub_menu_id FROM rt_sub_menu_master WHERE menu_id = {$systemMenuId} AND (sub_menu_route = '$route' OR sub_menu_name = '$name') LIMIT 1";
     if ($db->numRows($existsSql) === 0) {
-      $orderRow = $db->runQuery("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM st_sub_menu_master WHERE menu_id = {$systemMenuId}") ?? array();
+      $orderRow = $db->runQuery("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM rt_sub_menu_master WHERE menu_id = {$systemMenuId}") ?? array();
       $order = !empty($orderRow[0]['next_order']) ? (int) $orderRow[0]['next_order'] : 1;
-      $insertSql = "INSERT INTO st_sub_menu_master (menu_id, sort_order, sub_menu_name, sub_menu_icon, sub_menu_route) VALUES ({$systemMenuId}, $order, '$name', '$icon', '$route')";
+      $insertSql = "INSERT INTO rt_sub_menu_master (menu_id, sort_order, sub_menu_name, sub_menu_icon, sub_menu_route) VALUES ({$systemMenuId}, $order, '$name', '$icon', '$route')";
       $db->executeInsert($insertSql);
     }
   }
 
   $settingSubIds = array();
-  $settingRows = $db->runQuery("SELECT sub_menu_id FROM st_sub_menu_master WHERE menu_id = {$systemMenuId} ORDER BY sort_order ASC, sub_menu_id ASC") ?? array();
+  $settingRows = $db->runQuery("SELECT sub_menu_id FROM rt_sub_menu_master WHERE menu_id = {$systemMenuId} ORDER BY sort_order ASC, sub_menu_id ASC") ?? array();
   foreach ($settingRows as $settingRow) {
     $settingSubIds[] = (int) ($settingRow['sub_menu_id'] ?? 0);
   }
 
   if (!empty($settingSubIds)) {
-    $hasParentSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$systemMenuId} AND sub_menu_id IS NULL LIMIT 1";
+    $hasParentSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$systemMenuId} AND sub_menu_id IS NULL LIMIT 1";
     if ($db->numRows($hasParentSql) === 0) {
-      $db->executeInsert("INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$systemMenuId}, NULL)");
+      $db->executeInsert("INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$systemMenuId}, NULL)");
     }
 
     foreach ($settingSubIds as $subMenuId) {
@@ -78,9 +78,9 @@ function ensure_system_setting_submenus($db, $systemMenuId)
         continue;
       }
 
-      $allocExistsSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$systemMenuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
+      $allocExistsSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = 1 AND menu_id = {$systemMenuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
       if ($db->numRows($allocExistsSql) === 0) {
-        $db->executeInsert("INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$systemMenuId}, {$subMenuId})");
+        $db->executeInsert("INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, 1, {$systemMenuId}, {$subMenuId})");
       }
     }
   }
@@ -100,9 +100,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'load_role_allocated_items') {
                    COALESCE(m.menu_name, '') AS menu_name,
                    COALESCE(sm.sub_menu_name, '') AS sub_menu_name,
                    COALESCE(sm.sub_menu_route, '#') AS sub_menu_route
-            FROM st_menu_allocation_master ma
-            LEFT JOIN st_menu_master m ON m.menu_id = ma.menu_id
-            LEFT JOIN st_sub_menu_master sm ON sm.sub_menu_id = ma.sub_menu_id
+            FROM rt_menu_allocation_master ma
+            LEFT JOIN rt_menu_master m ON m.menu_id = ma.menu_id
+            LEFT JOIN rt_sub_menu_master sm ON sm.sub_menu_id = ma.sub_menu_id
             WHERE ma.user_id = 0 AND ma.role_id = {$roleId}
             ORDER BY m.menu_name ASC, sm.sort_order ASC, sm.sub_menu_name ASC, ma.menu_allocation_id ASC";
     $rows = $db->runQuery($sql) ?? array();
@@ -122,7 +122,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load_role_allocation') {
   );
 
   if ($roleId > 0) {
-    $allocRows = $db->runQuery("SELECT menu_id, sub_menu_id FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId}") ?? array();
+    $allocRows = $db->runQuery("SELECT menu_id, sub_menu_id FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId}") ?? array();
     foreach ($allocRows as $row) {
       if ($row['sub_menu_id'] === null) {
         $payload['menus'][] = (int) $row['menu_id'];
@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
   }
 
-  $ok = $db->executeUpdate("DELETE FROM st_menu_allocation_master WHERE menu_allocation_id = {$allocationId} AND user_id = 0");
+  $ok = $db->executeUpdate("DELETE FROM rt_menu_allocation_master WHERE menu_allocation_id = {$allocationId} AND user_id = 0");
   echo json_encode(array('success' => (bool) $ok));
   exit();
 }
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
   }
 
-  $ok = $db->executeUpdate("DELETE FROM st_menu_allocation_master WHERE role_id = {$roleId} AND user_id = 0");
+  $ok = $db->executeUpdate("DELETE FROM rt_menu_allocation_master WHERE role_id = {$roleId} AND user_id = 0");
   echo json_encode(array('success' => (bool) $ok));
   exit();
 }
@@ -169,7 +169,7 @@ require_once '../database/db_connect.php'; //  db class file name
  
 
 // FETCH ROLES FROM DATABASE
-$roles_raw = $db->runQuery("SELECT role_id, role_name FROM st_role_master") ?? [];
+$roles_raw = $db->runQuery("SELECT role_id, role_name FROM rt_role_master") ?? [];
  
 $roles = [];
 foreach ($roles_raw as $r) {
@@ -185,10 +185,10 @@ function allocation_has_menu_link($db, $roleId, $menuId, $subMenuId = null)
   $menuId = (int) $menuId;
 
   if ($subMenuId === null) {
-    $sql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId} AND menu_id = {$menuId} AND sub_menu_id IS NULL LIMIT 1";
+    $sql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId} AND menu_id = {$menuId} AND sub_menu_id IS NULL LIMIT 1";
   } else {
     $subMenuId = (int) $subMenuId;
-    $sql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId} AND menu_id = {$menuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
+    $sql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = {$roleId} AND menu_id = {$menuId} AND sub_menu_id = {$subMenuId} LIMIT 1";
   }
 
   return $db->numRows($sql) > 0;
@@ -202,23 +202,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role_id'])) {
     $selected_subs  = $_POST['sub_menu_ids'] ?? [];
  
     // 1. Delete old allocations
-    $db->executeUpdate("DELETE FROM st_menu_allocation_master WHERE role_id = $role_id AND user_id = 0");
+    $db->executeUpdate("DELETE FROM rt_menu_allocation_master WHERE role_id = $role_id AND user_id = 0");
  
     // 2. Insert submenus FIRST
     foreach ($selected_subs as $sub_menu_id) {
         $sub_menu_id = (int)$sub_menu_id;
-      $parentMenuRow = $db->runQuery("SELECT menu_id FROM st_sub_menu_master WHERE sub_menu_id = $sub_menu_id LIMIT 1") ?? array();
+      $parentMenuRow = $db->runQuery("SELECT menu_id FROM rt_sub_menu_master WHERE sub_menu_id = $sub_menu_id LIMIT 1") ?? array();
       $parentMenuId = !empty($parentMenuRow[0]['menu_id']) ? (int) $parentMenuRow[0]['menu_id'] : 0;
  
         $db->executeUpdate("
-            INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id)
+            INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id)
             SELECT 0, $role_id, menu_id, sub_menu_id
-            FROM st_sub_menu_master
+            FROM rt_sub_menu_master
             WHERE sub_menu_id = $sub_menu_id
         ");
 
       if ($parentMenuId > 0 && !allocation_has_menu_link($db, $role_id, $parentMenuId, null)) {
-        $db->executeInsert("INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, $role_id, $parentMenuId, NULL)");
+        $db->executeInsert("INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, $role_id, $parentMenuId, NULL)");
       }
     }
  
@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role_id'])) {
         $menu_id = (int)$menu_id;
  
         $exists = $db->numRows("
-            SELECT * FROM st_menu_allocation_master 
+            SELECT * FROM rt_menu_allocation_master 
             WHERE role_id = $role_id 
             AND menu_id = $menu_id 
             AND user_id = 0
@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role_id'])) {
  
         if ($exists == 0) {
             $db->executeInsert("
-                INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id)
+                INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id)
                 VALUES (0, $role_id, $menu_id, NULL)
             ");
         }
@@ -246,13 +246,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['role_id'])) {
 // ─────────────────────────────────────────────
 // FETCH ALL MENUS
 // ─────────────────────────────────────────────
-$all_menus = $db->runQuery("SELECT * FROM st_menu_master ORDER BY menu_id") ?? [];
+$all_menus = $db->runQuery("SELECT * FROM rt_menu_master ORDER BY menu_id") ?? [];
  
 // ─────────────────────────────────────────────
 // FETCH ALL SUB MENUS grouped by menu_id
 // ─────────────────────────────────────────────
 $all_subs  = [];
-$subs_raw  = $db->runQuery("SELECT * FROM st_sub_menu_master ORDER BY menu_id, sub_menu_id") ?? [];
+$subs_raw  = $db->runQuery("SELECT * FROM rt_sub_menu_master ORDER BY menu_id, sub_menu_id") ?? [];
 foreach ($subs_raw as $sub) {
     $all_subs[$sub['menu_id']][] = $sub;
 }

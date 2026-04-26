@@ -5,42 +5,74 @@ include_once("../database/db_connect.php");
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resource Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCET</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        body {
+            background: #2c3e50;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: flex-end; /* Align items to the right */
+            align-items: center; /* Center items vertically */
+        }
 
-<style>
+        /* 1. The Background Slider */
+        .bg-slider {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1; 
+            background-color: #2c3e50; /* Fallback color */
+        }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-}
+        .bg-slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            animation: fadeAnimation 30s infinite;
+        }
 
-/* Background Image */
-body {
-    display: flex;
-    position: relative;
-    background: url('images/background.jpg') no-repeat center center;
-    background-size: cover;
-}
+        /* 2. Animation Logic */
+        @keyframes fadeAnimation {
+           0% { opacity: 0; }
+            25% { opacity: 1; }
+            75% { opacity: 1; }
+            100% { opacity: 0; }
+        }
 
-/* RIGHT LOGIN PANEL */
-.w3layouts-main {
-    width: 30%;              /* stays on right */
-    height: 100%;
-    margin-left: auto;       /* pushes it to right */
+        /* 3. Assign images and delays */
+        .img1 { background-image: url('../login/images/auditorium.jpeg'); animation-delay: 0s; }
+        .img2 { background-image: url('../login/images/lab1.jpeg'); animation-delay: 5s; }
+        .img3 { background-image: url('../login/images/seminar1.jpeg'); animation-delay: 10s; }
+        .img4 { background-image: url('../login/images/lab2.jpeg'); animation-delay: 15s; }
+        .img5 { background-image: url('../login/images/Seminar2.jpeg'); animation-delay: 20s; }
+        .img6 { background-image: url('../login/images/lab3.jpeg'); animation-delay: 25s; }
 
-    display: flex;
-    justify-content: center; /* center card horizontally */
-    align-items: center;     /* center card vertically */
-}
+        /* 4. Main Layout */
+        /* .w3layouts-main {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            margin-left: auto;  
+        } */
 
-/* LOGIN CARD */
-.bg-layer {
+        .bg-layer {
     width: 320px;
     height: 50%;              /* 👈 controls height */
     min-height: 420px;        /* prevents it from becoming too small */
@@ -56,26 +88,37 @@ body {
     text-align: center;
     backdrop-filter: blur(12px);
 }
-.main-icon{
+
+       
+
+        /* .header-main {
+            background: #34495e;
+            padding: 20px;
+            border-radius: 10px;
+        } */
+
+        .main-icon{
     margin-top: -60px;
 }
 
-/* TITLE */
-.school-name {
+        .school-name {
     font-size: 20px;
     font-weight: 600;
     color: #6c4df6;
     margin-bottom: 5px;
 }
 
-.subtitle {
+        /* .header-left-bottom {
+            margin-top: 20px;
+        } */
+
+         .subtitle {
     font-size: 13px;
     color: #666;
     margin-bottom: 15px;
 }
 
-/* INPUT GROUP */
-.icon1 {
+        .icon1 {
     margin-top: -15px;
     margin-bottom: 12px;
     text-align: left;
@@ -87,8 +130,7 @@ body {
     display: block;
     margin-bottom: 6px;
 }
-
-.icon1 input {
+        .icon1 input {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
@@ -98,13 +140,21 @@ body {
     transition: 0.3s;
 }
 
-.icon1 input:focus {
+        .icon1 input:focus {
     border-color: #6c4df6;
     box-shadow: 0 0 5px rgba(108,77,246,0.3);
 }
 
-/* BUTTON */
-.btn {
+        .login-check {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .bottom {
+            margin-top: 20px;
+        }
+
+        .btn {
     width: 100%;
     background: linear-gradient(135deg, #5f2c82, #8f00ff);
     color: white;
@@ -153,50 +203,65 @@ body {
         background: rgba(255,255,255,0.95);
     }
 }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="script/validation.min.js"></script>
+    <script src="script/login.js"></script>
+    <script>
+        addEventListener("load", function () {
+            setTimeout(hideURLbar, 0);
+        }, false);
 
-</style>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="script/validation.min.js"></script>
-<script src="script/login.js"></script>
-
+        function hideURLbar() {
+            window.scrollTo(0, 1);
+        }
+    </script>
 </head>
-
 <body>
 
-<div class="w3layouts-main">
+<div class="bg-slider">
+    <div class="bg-slide img1"></div>
+    <div class="bg-slide img2"></div>
+    <div class="bg-slide img3"></div>
+    <div class="bg-slide img4"></div>
+    <div class="bg-slide img5"></div>
+    <div class="bg-slide img6"></div>
+</div>
+
+
+<div class="w3layouts-main"> 
     <div class="bg-layer"><br/><br/><br/><br/><br/>
-    
-        <div class="main-icon">
-            <img src="images/school_logo.jpg" alt="logo" width='120px' height='120px'>
-        </div>
-        <div class="school-name">Resource Tracker</div>
-        <div class="subtitle">Sign in to your account</div>
-    
-        <form id="login-form" method="post">
-
-            <div class="icon1">
-                <label>Username</label>
-                <input type="text" placeholder="Enter your username" name="username" id="username" required>
+       
+            <div class="main-icon">
+                <img src="images/school_logo.jpg" alt="logo" width='150px' height='150px'>
             </div>
-
-            <div class="icon1">
-                <label>Password</label>
-                <input type="password" placeholder="Enter your password" name="password" id="password" required>
+            <div class="school-name">
+                Resource Tracker
             </div>
-
-            <button type="submit" class="btn" name="login_button" id="login_button">Login</button>
+            <div class="subtitle">Sign in to your account</div>
+            
+                <form id="login-form" method="post">
+                    <div class="icon1">
+                        <label>Username</label>
+                        <input type="text" placeholder="Enter your username" name="username" id="username" required>
+                    </div>
+                    <div class="icon1">
+                        <label>Password</label>
+                        <input type="password" placeholder="Enter your password" name="password" id="password" required>
+                    </div>
+                     <button type="submit" class="btn" name="login_button" id="login_button">Login</button>
 
             <div class="forgot">
                 <a href="#">Forgot password?</a>
             </div>
 
             <div id="error"></div>
-
-        </form>
-
+                </form> 
+            </div>
+        
     </div>
 </div>
+
 
 </body>
 </html>

@@ -18,7 +18,7 @@ if (!$db_handle || !($db_handle->conn instanceof mysqli)) {
 	$username = trim($_POST['username']);
 	$user_password = trim($_POST['password']);
 
-	$sql = "SELECT * FROM st_login WHERE username=?";
+	$sql = "SELECT * FROM rt_login WHERE username=?";
 	$stmt = mysqli_prepare($db_handle->conn, $sql);
 
 	if (!$stmt) {

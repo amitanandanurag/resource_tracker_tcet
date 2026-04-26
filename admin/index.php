@@ -17,9 +17,9 @@ $hod_query = "SELECT
         WHEN MOD(d.department_id, 4) = 0 THEN 'On Leave'
         ELSE 'Available'
     END as status
-FROM st_department_master d
-LEFT JOIN st_login l ON l.role_id = 2 AND d.department_id = l.user_id
-LEFT JOIN st_student_master s ON s.department_id = d.department_id AND s.status = 1
+FROM rt_department_master d
+LEFT JOIN rt_login l ON l.role_id = 2 AND d.department_id = l.user_id
+LEFT JOIN rt_student_master s ON s.department_id = d.department_id AND s.status = 1
 ORDER BY d.department_id";
 
 $hod_result = mysqli_query($db_handle->conn, $hod_query);
@@ -42,23 +42,23 @@ if ($hod_result) {
 $db_handle = new DBController();
 
 // Total Students - Count from student master table
-$students_query = "SELECT COUNT(*) as total FROM st_student_master WHERE status = 1";
+$students_query = "SELECT COUNT(*) as total FROM rt_student_master WHERE status = 1";
 $students_result = mysqli_query($db_handle->conn, $students_query);
 $total_students = $students_result ? mysqli_fetch_assoc($students_result)['total'] : 0;
 
 // Total Users - Count from login table
-$users_query = "SELECT COUNT(*) as total FROM st_login";
+$users_query = "SELECT COUNT(*) as total FROM rt_login";
 $users_result = mysqli_query($db_handle->conn, $users_query);
 $total_users = $users_result ? mysqli_fetch_assoc($users_result)['total'] : 0;
 
 // Total Branches - Count from department master table
-$branches_query = "SELECT COUNT(*) as total FROM st_department_master";
+$branches_query = "SELECT COUNT(*) as total FROM rt_department_master";
 $branches_result = mysqli_query($db_handle->conn, $branches_query);
 $total_branches = $branches_result ? mysqli_fetch_assoc($branches_result)['total'] : 0;
 
 // Total Mentors Only - Count users with role_id 4 (Mentor) only
 // Role-based filtering: Excludes coordinators (role_id 3) and other roles
-$mentor_query = "SELECT COUNT(*) as total FROM st_login WHERE role_id = 4";
+$mentor_query = "SELECT COUNT(*) as total FROM rt_login WHERE role_id = 4";
 $mentor_result = mysqli_query($db_handle->conn, $mentor_query);
 $total_mentor = $mentor_result ? mysqli_fetch_assoc($mentor_result)['total'] : 0;
 
@@ -70,8 +70,8 @@ $spec_query = "SELECT
     SUM(CASE WHEN s.status = 1 THEN 1 ELSE 0 END) as approved,
     SUM(CASE WHEN s.status = 0 THEN 1 ELSE 0 END) as pending,
     0 as rejected
-FROM st_specialization_master sm
-LEFT JOIN st_student_master s ON sm.specialization_id = s.specialization_id
+FROM rt_specialization_master sm
+LEFT JOIN rt_student_master s ON sm.specialization_id = s.specialization_id
 GROUP BY sm.specialization_id, sm.specialization_name
 ORDER BY sm.specialization_id";
 
@@ -101,8 +101,8 @@ foreach ($spec_data as $sd) {
 $branch_query = "SELECT 
     d.department_name as code,
     COUNT(s.student_id) as count
-FROM st_department_master d
-LEFT JOIN st_student_master s ON d.department_id = s.department_id AND s.status = 1
+FROM rt_department_master d
+LEFT JOIN rt_student_master s ON d.department_id = s.department_id AND s.status = 1
 GROUP BY d.department_id, d.department_name
 ORDER BY d.department_id";
 
@@ -123,8 +123,8 @@ if ($branch_result) {
 $roles_query = "SELECT 
     r.role_name,
     COUNT(l.login_id) as count
-FROM st_role_master r
-LEFT JOIN st_login l ON r.role_id = l.role_id
+FROM rt_role_master r
+LEFT JOIN rt_login l ON r.role_id = l.role_id
 GROUP BY r.role_id, r.role_name
 ORDER BY r.role_id";
 
@@ -146,7 +146,7 @@ $recent_query = "SELECT
     '' as lname,
     s.registration_no as register_number,
     s.created_at
-FROM st_student_master s
+FROM rt_student_master s
 WHERE s.status = 1
 ORDER BY s.created_at DESC
 LIMIT 5";
@@ -225,10 +225,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_hod'])) {
     }
 }
 
-  $result=$db_handle->conn->query("SELECT * fROM st_student_master where status='0'");
+  $result=$db_handle->conn->query("SELECT * fROM rt_student_master where status='0'");
   $rowcount=mysqli_num_rows($result);
 
-  $result1=$db_handle->conn->query("SELECT * fROM st_user_master where 1=1");
+  $result1=$db_handle->conn->query("SELECT * fROM rt_user_master where 1=1");
   $rowcount_user=mysqli_num_rows($result1);
 ?>
 
