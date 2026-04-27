@@ -174,48 +174,53 @@ if ($menuStmt) {
 }
 ?>
 
-<ul class="sidebar-menu" id="sidebar-dynamic-menu">
-<li class="active"><a href="index.php"><i class="fa fa-user"></i><span><?php echo htmlspecialchars($role_name); ?></span></a></li>
+<ul class="sidebar-menu" id="sidebar-dynamic-menu"  data-widget="tree">
+	<li class="active"><a href="index.php"><i
+				class="fa fa-user"></i><span><?php echo htmlspecialchars($role_name); ?></span></a></li>
 
-<?php foreach ($menuTree as $menuId => $menuData) {
-	$menuName = trim((string) $menuData['menu_name']);
-	$menuIcon = trim((string) $menuData['menu_icon']);
-	if ($menuIcon === '') {
-		$menuIcon = 'fa fa-folder';
-	}
-?>
-<li class="treeview" data-menu-id="<?php echo $menuId; ?>" id="sidebar-menu-<?php echo $menuId; ?>">
-<a href="#">
-<i class="<?php echo htmlspecialchars($menuIcon); ?>" aria-hidden="true"></i> <span><?php echo strtoupper(htmlspecialchars($menuName)); ?></span>
-<span class="pull-right-container">
-<i class="fa fa-angle-right pull-right"></i>
-</span>
-</a>
-<ul class="treeview-menu" id="sidebar-submenu-<?php echo $menuId; ?>">
-<?php if (!empty($menuData['submenus'])) {
-	foreach ($menuData['submenus'] as $subMenu) {
-		$subId = intval($subMenu['sub_menu_id']);
-		$subName = trim((string) $subMenu['sub_menu_name']);
-		$subRoute = trim((string) ($subMenu['sub_menu_route'] ?? '#'));
-		$subIcon = trim((string) ($subMenu['sub_menu_icon'] ?? 'fa fa-angle-double-right'));
-		if ($subRoute === '') {
-			$subRoute = '#';
+	<?php foreach ($menuTree as $menuId => $menuData) {
+		$menuName = trim((string) $menuData['menu_name']);
+		$menuIcon = trim((string) $menuData['menu_icon']);
+		if ($menuIcon === '') {
+			$menuIcon = 'fa fa-folder';
 		}
-		if ($subIcon === '') {
-			$subIcon = 'fa fa-angle-double-right';
-		}
-?>
-<li data-sub-menu-id="<?php echo $subId; ?>" id="sidebar-submenu-item-<?php echo $subId; ?>"><a href="<?php echo htmlspecialchars($subRoute); ?>"><i class="<?php echo htmlspecialchars($subIcon); ?>"></i><?php echo strtoupper(htmlspecialchars($subName)); ?></a></li>
-<?php }
-} ?>
-</ul>
-</li>
-<?php } ?>
+		?>
+		<li class="treeview" data-menu-id="<?php echo $menuId; ?>" id="sidebar-menu-<?php echo $menuId; ?>">
+			<a href="#">
+				<i class="<?php echo htmlspecialchars($menuIcon); ?>" aria-hidden="true"></i>
+				<span><?php echo strtoupper(htmlspecialchars($menuName)); ?></span>
+				<span class="pull-right-container">
+					<i class="fa fa-angle-right pull-right"></i>
+				</span>
+			</a>
+			<ul class="treeview-menu" id="sidebar-submenu-<?php echo $menuId; ?>">
+				<?php if (!empty($menuData['submenus'])) {
+					foreach ($menuData['submenus'] as $subMenu) {
+						$subId = intval($subMenu['sub_menu_id']);
+						$subName = trim((string) $subMenu['sub_menu_name']);
+						$subRoute = trim((string) ($subMenu['sub_menu_route'] ?? '#'));
+						$subIcon = trim((string) ($subMenu['sub_menu_icon'] ?? 'fa fa-angle-double-right'));
+						if ($subRoute === '') {
+							$subRoute = '#';
+						}
+						if ($subIcon === '') {
+							$subIcon = 'fa fa-angle-double-right';
+						}
+						?>
+						<li data-sub-menu-id="<?php echo $subId; ?>" id="sidebar-submenu-item-<?php echo $subId; ?>"><a
+								href="<?php echo htmlspecialchars($subRoute); ?>"><i
+									class="<?php echo htmlspecialchars($subIcon); ?>"></i><?php echo strtoupper(htmlspecialchars($subName)); ?></a>
+						</li>
+					<?php }
+				} ?>
+			</ul>
+		</li>
+	<?php } ?>
 
 </ul>
 
 <?php if (empty($menuTree)) { ?>
-<div class="text-muted" style="padding: 10px 15px;">No menu items are assigned to this role.</div>
+	<div class="text-muted" style="padding: 10px 15px;">No menu items are assigned to this role.</div>
 <?php } ?>
 
 </section>
