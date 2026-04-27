@@ -22,6 +22,7 @@ include_once("../database/db_connect.php");
             display: flex;
             justify-content: flex-end; /* Align items to the right */
             align-items: center; /* Center items vertically */
+            padding-right: 70px;
         }
 
         /* 1. The Background Slider */
@@ -77,9 +78,9 @@ include_once("../database/db_connect.php");
     height: 50%;              /* 👈 controls height */
     min-height: 420px;        /* prevents it from becoming too small */
     padding: 20px 18px;
-    background: #ffffff;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.92);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 
     display: flex;            /* 👇 helps align content nicely */
     flex-direction: column;
@@ -184,6 +185,17 @@ include_once("../database/db_connect.php");
 .forgot a:hover {
     text-decoration: underline;
 }
+.register {
+    margin-top: 5px;
+    font-size: 13px;
+}
+.register a {
+    color: #5f2c82;
+    text-decoration: none;
+}
+.register a:hover {
+    text-decoration: underline;
+}
 
 /* ERROR */
 #error {
@@ -199,8 +211,16 @@ include_once("../database/db_connect.php");
     }
 
     .w3layouts-main {
-        width: 100%;
-        background: rgba(255,255,255,0.95);
+        position: relative;
+        z-index: 1;
+        padding: 25px;
+        border-radius: 25px;
+
+        background: rgba(255,255,255,0.18);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
     }
 }
     </style>
@@ -253,6 +273,9 @@ include_once("../database/db_connect.php");
 
             <div class="forgot">
                 <a href="#">Forgot password?</a>
+            </div>
+            <div class="register">
+                <a href="register.php">New User? Register Here</a>
             </div>
 
             <div id="error"></div>
