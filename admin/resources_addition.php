@@ -34,14 +34,14 @@
                         <!-- Name -->
                         <div class="col-md-4">
                             <label>Resource Name *</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="resource_name" class="form-control" required>
                         </div>
 
                         <!-- Code -->
-                        <div class="col-md-4">
+                        <!-- <div class="col-md-4">
                             <label>Code</label>
                             <input type="text" name="code" class="form-control">
-                        </div>
+                        </div> -->
 
                         <!-- Type -->
                         <div class="col-md-4">
