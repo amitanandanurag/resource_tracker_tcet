@@ -1,8 +1,24 @@
 <?php
-include "../db_connect.php";
+include "../database/db_connect.php";
+
 $db_handle = new DBController();
 
-$id = $_POST['id'];
+if(isset($_POST['id'])){
 
-$db_handle->query("DELETE FROM rt_resources WHERE resource_id='$id'");
+    $id = intval($_POST['id']);
+
+    // Soft delete (deactivate)
+    $sql = "UPDATE rt_resources SET is_active = 0 WHERE resource_id = $id";
+
+    $result = $db_handle->query($sql);
+
+    if($result){
+        echo "success";
+    }else{
+        echo "error";
+    }
+
+}else{
+    echo "invalid";
+}
 ?>

@@ -6,18 +6,13 @@
 </section>
 
 <section class="content">
+
 <div class="box box-primary">
 
 <div class="box-header">
-    <div class="row">
-
-        <div class="col-md-2">
-            <button onclick="window.location.href='resources_addition.php'" class="btn btn-primary btn-block">
-                <i class="fa fa-plus"></i> ADD RESOURCE
-            </button>
-        </div>
-
-    </div>
+    <button onclick="window.location.href='add_resource.php'" class="btn btn-primary">
+        + ADD RESOURCE
+    </button>
 </div>
 
 <div class="box-body">
@@ -41,29 +36,31 @@
 
 </div>
 </div>
+
 </section>
 </div>
 
-<?php include "header/footer.php"; ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 
 <script>
 $(document).ready(function(){
 
 $('#resourceTable').DataTable({
-    "processing": true,
-    "serverSide": true,
+    processing: true,
+    serverSide: true,
 
-    "ajax": {
-        "url": "resource_ajax.php",
-        "type": "POST"
+    ajax: {
+        url: "resource_ajax.php",
+        type: "POST"
     },
 
-    "columns": [
+    columns: [
         { data: "sr" },
         { data: "name" },
         { data: "code" },
-        { data: "type_name" },
-        { data: "department_name" },
+        { data: "type" },
+        { data: "department" },
         { data: "capacity" },
         { data: "building" },
         { data: "floor" },
@@ -73,16 +70,33 @@ $('#resourceTable').DataTable({
 });
 
 });
+
 </script>
 
 <script>
 function deleteResource(id){
 
-if(confirm("Are you sure to delete?")){
-    $.post("resource_delete.php",{id:id},function(){
-        $('#resourceTable').DataTable().ajax.reload();
-    });
-}
+    if(confirm("Are you sure you want to delete this resource?")){
 
+        $.ajax({
+            url: "resource_delete.php",
+            type: "POST",
+            data: { id: id },
+
+            success: function(response){
+                // reload table
+                $('#resourceTable').DataTable().ajax.reload();
+
+                alert("Resource deleted successfully");
+            },
+
+            error: function(){
+                alert("Error deleting resource");
+            }
+        });
+
+    }
 }
 </script>
+
+<?php include "header/footer.php"; ?>
