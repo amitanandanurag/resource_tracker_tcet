@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Apr 26, 2026 at 02:36 PM
+-- Generation Time: Apr 27, 2026 at 10:30 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -321,7 +321,7 @@ CREATE TABLE `rt_menu_master` (
 --
 
 INSERT INTO `rt_menu_master` (`menu_id`, `menu_name`, `menu_icon`) VALUES
-(1, 'Students', 'fa fa-graduation-cap'),
+(1, 'Resources', 'fa fa-graduation-cap'),
 (2, 'Admin', 'fa fa-cogs'),
 (3, 'coordinator', 'fa fa-user-secret'),
 (4, 'mentor', 'fa fa-users'),
@@ -383,7 +383,7 @@ CREATE TABLE `rt_recurring_bookings` (
 
 CREATE TABLE `rt_resources` (
   `resource_id` int(11) NOT NULL,
-  `name` varchar(150) NOT NULL,
+  `resource_name` varchar(150) NOT NULL,
   `code` varchar(50) DEFAULT NULL,
   `type_id` int(11) NOT NULL,
   `department_id` int(11) DEFAULT NULL,
@@ -394,6 +394,16 @@ CREATE TABLE `rt_resources` (
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_resources`
+--
+
+INSERT INTO `rt_resources` (`resource_id`, `resource_name`, `code`, `type_id`, `department_id`, `capacity`, `building`, `floor`, `description`, `is_active`, `created_at`) VALUES
+(4, 'Computer Lab - 520', 'LAB001', 2, 1, 0, '', '5', 'Lab 520', 1, '2026-04-27 19:47:06'),
+(5, 'Computer Lab - 521', 'LAB002', 2, 1, 0, '', '5', '', 1, '2026-04-27 19:47:29'),
+(6, 'Classroom - 710', 'CR001', 1, 1, 0, '', '7', '', 1, '2026-04-27 19:48:09'),
+(7, 'Computer Lab 522', 'LAB003', 2, 11, 0, '', '5', '', 1, '2026-04-27 20:28:05');
 
 -- --------------------------------------------------------
 
@@ -435,6 +445,16 @@ CREATE TABLE `rt_resource_types` (
   `description` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rt_resource_types`
+--
+
+INSERT INTO `rt_resource_types` (`type_id`, `type_name`, `description`, `created_at`) VALUES
+(1, 'Classroom', 'Regular teaching classroom', '2026-04-27 19:08:54'),
+(2, 'Laboratory', 'Practical lab with equipment', '2026-04-27 19:08:54'),
+(3, 'Auditorium', 'Large hall for events', '2026-04-27 19:08:54'),
+(4, 'Seminar Hall', 'Medium hall for presentations', '2026-04-27 19:08:54');
 
 -- --------------------------------------------------------
 
@@ -490,9 +510,9 @@ CREATE TABLE `rt_sub_menu_master` (
 --
 
 INSERT INTO `rt_sub_menu_master` (`sub_menu_id`, `menu_id`, `sort_order`, `sub_menu_name`, `sub_menu_icon`, `sub_menu_route`) VALUES
-(1, 1, 1, 'Register Students', 'fa fa-plus', 'student_admission.php'),
-(2, 1, 2, 'List of Students', 'fa fa-info-circle', 'student-info.php'),
-(5, 1, 3, 'Concise Details', 'fa fa-info-circle', 'student_concise_details.php'),
+(1, 1, 1, 'Register Resources', 'fa fa-plus', 'resources_addition.php'),
+(2, 1, 2, 'List of Resources', 'fa fa-info-circle', 'resource_list.php'),
+(5, 1, 3, 'Concise Details', 'fa fa-info-circle', 'resource_concise_details.php'),
 (7, 2, 1, 'Register Admin', 'fa fa-plus', 'admin_register.php'),
 (8, 2, 2, 'Admin Info', 'fa fa-info-circle', 'admin_info.php'),
 (9, 3, 1, 'Register Coordinator', 'fa fa-plus', 'coordinator_register.php'),
@@ -575,7 +595,8 @@ CREATE TABLE `rt_user_master` (
 INSERT INTO `rt_user_master` (`user_id`, `user_name`, `email_id`, `phone_number`, `department_id`, `role_id`, `student_id`) VALUES
 (1, 'Anurag Mishra', 'amit@tcetmumbai.in', '8080590516', 1, 1, 0),
 (2, 'Amit Kumar', 'anurag@tcetmumbai.in', '8080590516', 1, 2, 0),
-(3, 'Ashutosh Pandey', 'asdf@tcetmumbai.in', '234', 2, 2, 0);
+(3, 'Ashutosh Pandey', 'asdf@tcetmumbai.in', '234', 2, 2, 0),
+(4, 'tilakygupta', 'tilak@tcetmumbai.in', '9137346604', 1, 1, 0);
 
 --
 -- Indexes for dumped tables
@@ -856,7 +877,7 @@ ALTER TABLE `rt_recurring_bookings`
 -- AUTO_INCREMENT for table `rt_resources`
 --
 ALTER TABLE `rt_resources`
-  MODIFY `resource_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `resource_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `rt_resource_facilities`
@@ -874,7 +895,7 @@ ALTER TABLE `rt_resource_images`
 -- AUTO_INCREMENT for table `rt_resource_types`
 --
 ALTER TABLE `rt_resource_types`
-  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `rt_role_master`
@@ -910,7 +931,7 @@ ALTER TABLE `rt_user_log_master`
 -- AUTO_INCREMENT for table `rt_user_master`
 --
 ALTER TABLE `rt_user_master`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
