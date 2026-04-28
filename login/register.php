@@ -1,7 +1,3 @@
-<?php
-include('header.php');
-include_once("../database/dbconnect.php");
-?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -14,18 +10,21 @@ include_once("../database/dbconnect.php");
 
             body {
                 margin: 0;
+                padding: 0;
                 font-family: 'Segoe UI', sans-serif;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
                 background-color: #f5f6fa;
+                background: transparent;
             }
 
             /* Main Container */
-            .container {
+            .registerContainer {
                 width: 350px;
-                padding: 25px 20px;
+                margin: 10px auto;
+                padding: 18px;
                 background: #ffffff;
                 border: 1px solid #ddd;
                 border-radius: 10px;
@@ -34,14 +33,27 @@ include_once("../database/dbconnect.php");
             }
 
             /* Logo */
-            .logo img {
-                margin-bottom: 10px;
+            
+            .logo-box{
+                text-align:center;
+                margin-top: 0 0 10px 0;
+                margin-bottom: 15px;
+            }
+
+            .logo-img{
+                width:100px;
+                height:100px;
+                object-fit:contain;
+                display:block;
+                margin:auto;
             }
 
             /* Heading */
             .heading h2 {
-                margin-bottom: 20px;
+                text-align: center;
+                margin: 5px 0 10px 0;
                 color: #333;
+                font-size: 20px;
             }
 
             /* Form Fields */
@@ -93,9 +105,9 @@ include_once("../database/dbconnect.php");
 
     </head>
     <body>
-        <div class="container">
-            <div class="logo">
-                <img src="images/school_logo.jpg" alt="logo" width="100" height="100"/>
+        <div class="registerContainer">
+            <div class="logo-box">
+                <img src="/ResourceTracker/login/images/school_logo.jpg" alt="logo" width="100" height="100"/>
             </div>
             <div class="heading">
                 <h2>Registration Form</h2>
@@ -126,7 +138,12 @@ include_once("../database/dbconnect.php");
                         <label for="confirm-password">Confirm Password</label>
                         <input type="password" placeholder="Enter your Password" name="confirm-password" id="confirm-password" required /><br>
                     </div>
-                    <button type="submit" class="submit-btn">Submit</button>
+                    <button type="submit" class="submit-btn">Register</button>
+                    <div style="margin-top:10px;">
+                        <a href="javascript:parent.showLogin()">
+                        Already have account? Login
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
