@@ -223,6 +223,7 @@ include_once("../database/db_connect.php");
         box-shadow: 0 8px 32px rgba(0,0,0,0.25);
     }
 }
+
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="script/validation.min.js"></script>
@@ -234,6 +235,15 @@ include_once("../database/db_connect.php");
 
         function hideURLbar() {
             window.scrollTo(0, 1);
+        }
+        function openRegister(){
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("registerFrameBox").style.display = "block";
+        }
+
+        function showLogin(){
+            document.getElementById("registerFrameBox").style.display = "none";
+            document.getElementById("loginBox").style.display = "block";
         }
     </script>
 </head>
@@ -251,7 +261,7 @@ include_once("../database/db_connect.php");
 
 <div class="w3layouts-main"> 
     <div class="bg-layer"><br/><br/><br/><br/><br/>
-       
+        <div id="loginBox">
             <div class="main-icon">
                 <img src="images/school_logo.jpg" alt="logo" width='150px' height='150px'>
             </div>
@@ -259,7 +269,7 @@ include_once("../database/db_connect.php");
                 Resource Tracker
             </div>
             <div class="subtitle">Sign in to your account</div>
-            
+                
                 <form id="login-form" method="post">
                     <div class="icon1">
                         <label>Username</label>
@@ -271,20 +281,31 @@ include_once("../database/db_connect.php");
                     </div>
                      <button type="submit" class="btn" name="login_button" id="login_button">Login</button>
 
-            <div class="forgot">
-                <a href="#">Forgot password?</a>
-            </div>
-            <div class="register">
-                <a href="register.php">New User? Register Here</a>
-            </div>
-
-            <div id="error"></div>
+                    <div class="forgot">
+                        <a href="#">Forgot password?</a>
+                    </div>
+                    <div class="register">
+                        <a href="javascript:void(0)" onclick="openRegister()">
+                            New User? Register Here
+                        </a>
+                    </div>
+                    
+                    <div id="error"></div>
                 </form> 
-            </div>
-        
+        </div>
+        <div id="registerFrameBox" style="display:none;">
+            <iframe 
+                src="register.php"
+                width="100%"
+                height="650"
+                frameborder="0"
+                style="border:none; border-radius:15px;"
+                style="margin-top:0;"
+                style="display: flex;">
+            </iframe>
+        </div>
+        <div id="registerContainer" style="display:none;"></div>
     </div>
-</div>
-
-
+ </div>
 </body>
 </html>
