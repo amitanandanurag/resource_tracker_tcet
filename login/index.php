@@ -13,11 +13,13 @@ include_once("../database/db_connect.php");
         html, body {
             height: 100%;
             margin: 0;
+            padding: 0;
             overflow: hidden;
+            border: none;
         }
 
         body {
-            background: #2c3e50;
+            
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: flex-end; /* Align items to the right */
@@ -29,9 +31,11 @@ include_once("../database/db_connect.php");
         .bg-slider {
             position: fixed;
             top: 0; left: 0;
-            width: 100%; height: 100%;
+            width: 100vw; height: 100vh;
             z-index: -1; 
             background-color: #2c3e50; /* Fallback color */
+            margin: 0;
+            padding: 0;
         }
 
         .bg-slide {
@@ -78,16 +82,16 @@ include_once("../database/db_connect.php");
     height: 50%;              /* 👈 controls height */
     min-height: 420px;        /* prevents it from becoming too small */
     padding: 20px 18px;
-    background: rgba(255,255,255,0.92);
-    border-radius: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    background: rgba(255,255,255,0.55);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
 
     display: flex;            /* 👇 helps align content nicely */
     flex-direction: column;
     justify-content: center;  /* center content vertically */
 
     text-align: center;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(15px);
 }
 
        
@@ -133,12 +137,14 @@ include_once("../database/db_connect.php");
 }
         .icon1 input {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
+    padding: 10px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
     border-radius: 8px;
     font-size: 13px;
     outline: none;
     transition: 0.3s;
+    color: #000;
 }
 
         .icon1 input:focus {
@@ -165,6 +171,11 @@ include_once("../database/db_connect.php");
     font-size: 14px;
     cursor: pointer;
     transition: 0.3s;
+}
+.icon1,
+.header-left-bottom,
+form {
+    background: transparent !important;
 }
 
 .btn:hover {
@@ -215,12 +226,13 @@ include_once("../database/db_connect.php");
         z-index: 1;
         padding: 25px;
         border-radius: 25px;
-
-        background: rgba(255,255,255,0.18);
+        background: white;
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
-
         box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    *.w3layouts-main{
+        border: none !important;
     }
 }
 
