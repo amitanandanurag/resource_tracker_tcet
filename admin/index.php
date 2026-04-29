@@ -264,7 +264,7 @@ require "header/header.php";
             <i class="fa fa-dashboard"></i> <span><strong> Dashboard</strong></span>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="index.php"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="./index.php"><i class="fa fa-dashboard"></i> Home</a></li>
             <li class="active">Dashboard</li>
         </ol>
     </section>

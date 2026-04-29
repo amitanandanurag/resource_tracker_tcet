@@ -1,9 +1,11 @@
 <?php
-	session_start();
-	unset($_SESSION['user_session']);
-	unset($_SESSION['user_type']);
-	if(session_destroy()) {
-		header("Location: ../");
-	}
-	
+session_start();
+
+// clear session
+$_SESSION = [];
+session_destroy();
+
+// correct redirect
+header("Location: /resourcetracker/login/index.php");
+exit;
 ?>

@@ -4,7 +4,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 include_once("../database/db_connect.php");
 if (!isset($_SESSION['user_session'])) {
-  header("location: ../index.php");
+  header("location: ./index.php");
   exit();
 }
 
