@@ -1,3 +1,76 @@
+<?php
+ob_start();
+session_start();
+require "../database/db_connect.php";
+$db_handle = new DBController();
+
+$message = "";
+if (isset($_POST['register'])) {
+
+    $first_name = mysqli_real_escape_string($db_handle->conn, $_POST['first_name']);
+    $last_name = mysqli_real_escape_string($db_handle->conn, $_POST['last_name']);
+    $email = mysqli_real_escape_string($db_handle->conn, $_POST['email']);
+    $phone = mysqli_real_escape_string($db_handle->conn, $_POST['phone']);
+    $department = mysqli_real_escape_string($db_handle->conn, $_POST['department']);
+    $password = mysqli_real_escape_string($db_handle->conn, $_POST['password']);
+    $confirm_password = mysqli_real_escape_string($db_handle->conn, $_POST['confirm_password']);
+
+    $role_id = 5;
+    $student_id = 0;
+
+    if ($password !== $confirm_password) {
+        $message = "Passwords do not match!";
+    } elseif (strpos($email, "@tcetmumbai.in") === false) {
+        $message = "Use institute email only!";
+    } else {
+
+        $check = $db_handle->query("SELECT * FROM rt_user_master WHERE email_id='$email'");
+
+        if ($check && mysqli_num_rows($check) > 0) {
+            $message = "Email already exists!";
+        } else {
+
+//$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+            $sql1 = "INSERT INTO rt_user_master 
+            (first_name, last_name, email_id, phone_number, department_id, role_id, student_id)
+            VALUES 
+            ('$first_name','$last_name','$email','$phone','$department','$role_id','$student_id')";
+
+            if ($db_handle->query($sql1)) {
+
+                $user_id = mysqli_insert_id($db_handle->conn);
+
+                $sql2 = "INSERT INTO rt_login(username,password,role_id,user_id)
+                         VALUES('$email','$password','$role_id','$user_id')";
+
+                if ($db_handle->query($sql2)) {
+
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['role_id'] = $role_id;
+                    //header("Location: index.php");
+                    //exit();
+                    //echo "<script>
+                       //alert('Registration Successful!');
+                       //window.top.location.replace('index.php');
+                   // </script>";
+                    //exit();
+                    echo "<script>window.top.location.href='index.php';</script>";
+                    exit();
+
+                } else {
+                    $message = "Login Insert Error";
+                }
+
+            } else {
+                $message = "User Insert Error";
+            }
+        }
+    }
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -77,7 +150,14 @@
                 border-radius: 5px;
                 outline: none;
             }
-
+            .dept{
+                width: 95%;
+                padding: 8px;
+                font-size: 13px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                outline: none;
+            }
             /* Focus Effect */
             .label1 input:focus {
                 border-color: #6c4df6;
@@ -115,30 +195,48 @@
             <div class="main-form">
                 <form id="register-form" method="post">
                     <div class="label1">
-                        <label for="firstname">First Name</label>
-                        <input type="text" placeholder="Enter your First Name" name="firstname" id="firstname" required /><br>
+                        <label for="first_name">First Name</label>
+                        <input type="text" placeholder="Enter your First Name" name="first_name" id="first_name" required /><br>
                     </div>
                     <div class="label1">
-                        <label for="lastname">Last Name</label>
-                        <input type="text" placeholder="Enter your Last Name" name="lastname" id="lastname" required /><br>
+                        <label for="last_name">Last Name</label>
+                        <input type="text" placeholder="Enter your Last Name" name="last_name" id="last_name" required /><br>
                     </div>
                     <div class="label1">
                         <label for="email">Email</label>
                         <input type="email" placeholder="Enter your Email Id" name="email" id="email" required /><br>
                     </div>
                     <div class="label1">
-                        <label for="contact">Contact</label>
-                        <input type="number" placeholder="Enter your Contact Number" name="contact" id="contact" required /><br>
+                        <label for="phone">Phone</label>
+                        <input type="number" placeholder="Enter your Contact Number" name="phone" id="phone" required /><br>
+                    </div>
+                    <div class="label1">
+                        <label for="department">Department</label>
+                        <select name="department"  class="dept" required>
+                        <option value="">SELECT DEPARTMENT</option>
+                        <?php
+                            $dept = $db_handle->query("SELECT department_id, department_name FROM rt_department_master");
+
+                            if ($dept && $dept->num_rows > 0) {
+                                while ($row = $dept->fetch_assoc()) {
+                                    echo '<option value="' . $row['department_id'] . '">' . $row['department_name'] . '</option>';
+                                }
+                            } else {
+                                echo '<option value="">No Departments Found</option>';
+                            }
+                            ?>
+                        </select>
+
                     </div>
                     <div class="label1">
                         <label for="password">Password</label>
                         <input type="password" placeholder="Enter your Password" name="password" id="password" required /><br>
                     </div>
                     <div class="label1">
-                        <label for="confirm-password">Confirm Password</label>
-                        <input type="password" placeholder="Enter your Password" name="confirm-password" id="confirm-password" required /><br>
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" placeholder="Enter your Password" name="confirm_password" id="confirm_password" required /><br>
                     </div>
-                    <button type="submit" class="submit-btn">Register</button>
+                    <button type="submit" class="submit-btn" name="register">Register</button>
                     <div style="margin-top:10px;">
                         <a href="javascript:parent.showLogin()">
                         Already have account? Login

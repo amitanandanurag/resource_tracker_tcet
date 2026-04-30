@@ -134,6 +134,7 @@ include_once("../database/db_connect.php");
     font-weight: 500;
     display: block;
     margin-bottom: 6px;
+    font-style: bold;
 }
         .icon1 input {
     width: 100%;
