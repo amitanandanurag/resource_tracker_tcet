@@ -10,7 +10,7 @@
 <div class="box box-primary">
 
 <div class="box-header">
-    <button onclick="window.location.href='add_resource.php'" class="btn btn-primary">
+    <button onclick="window.location.href='resources_addition.php'" class="btn btn-primary">
         + ADD RESOURCE
     </button>
 </div>
@@ -40,40 +40,40 @@
 </section>
 </div>
 
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 
 <script>
 $(document).ready(function(){
 
-$('#resourceTable').DataTable({
-    processing: true,
-    serverSide: true,
+    $('#resourceTable').DataTable({
+        processing: true,
+        serverSide: true,
+        destroy: true,
 
-    ajax: {
-        url: "resource_ajax.php",
-        type: "POST"
-    },
+        ajax: {
+            url: "resource_ajax.php",
+            type: "POST"
+        },
 
-    columns: [
-        { data: "sr" },
-        { data: "name" },
-        { data: "code" },
-        { data: "type" },
-        { data: "department" },
-        { data: "capacity" },
-        { data: "building" },
-        { data: "floor" },
-        { data: "status" },
-        { data: "action" }
-    ]
+        columns: [
+            { data: "sr" },
+            { data: "name" },
+            { data: "code" },
+            { data: "type" },
+            { data: "department" },
+            { data: "capacity" },
+            { data: "building" },
+            { data: "floor" },
+            { data: "status", orderable: false },
+            { data: "action", orderable: false }
+        ]
+    });
+
 });
 
-});
-
-</script>
-
-<script>
+// DELETE FUNCTION
 function deleteResource(id){
 
     if(confirm("Are you sure you want to delete this resource?")){
@@ -84,9 +84,7 @@ function deleteResource(id){
             data: { id: id },
 
             success: function(response){
-                // reload table
-                $('#resourceTable').DataTable().ajax.reload();
-
+                $('#resourceTable').DataTable().ajax.reload(null, false);
                 alert("Resource deleted successfully");
             },
 

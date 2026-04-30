@@ -2,31 +2,35 @@
 include "../database/db_connect.php";
 $db_handle = new DBController();
 
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
-if ($id == 0) {
+if (!isset($_GET['id']) || empty($_GET['id'])) {
     die("Invalid Resource ID");
 }
 
-$query = "SELECT * FROM rt_resources WHERE resource_id = $id";
+$id = intval($_GET['id']);
+
+// 🔥 STRICT QUERY (only required fields)
+$query = "SELECT resource_id, resource_name, code, type_id, department_id, capacity, building, floor, description, is_active 
+          FROM rt_resources 
+          WHERE resource_id = $id";
+
 $result = $db_handle->conn->query($query);
 
 if (!$result || $result->num_rows == 0) {
-    die("No resource found");
+    die("Resource not found");
 }
 
 $row = $result->fetch_assoc();
 
-// SAFE VALUES
-$name = $row['resource_name'] ?? '';
-$code = $row['code'] ?? '';
-$type_id = $row['type_id'] ?? '';
-$department_id = $row['department_id'] ?? '';
-$capacity = $row['capacity'] ?? '';
-$building = $row['building'] ?? '';
-$floor = $row['floor'] ?? '';
-$description = $row['description'] ?? '';
-$is_active = $row['is_active'] ?? 1;
+// ✅ Assign values safely
+$resource_name = $row['resource_name'];
+$code = $row['code'];
+$type_id = $row['type_id'];
+$department_id = $row['department_id'];
+$capacity = $row['capacity'];
+$building = $row['building'];
+$floor = $row['floor'];
+$description = $row['description'];
+$is_active = $row['is_active'];
 ?>
 
 <?php include "header/header.php"; ?>
@@ -52,7 +56,7 @@ $is_active = $row['is_active'] ?? 1;
 
                         <div class="col-md-4">
                             <label>Resource Name</label>
-                            <input type="text" name="resource_name" value="<?= htmlspecialchars($name) ?>"
+                            <input type="text" name="resource_name" value="<?= htmlspecialchars($resource_name) ?>"
                                 class="form-control" required>
                         </div>
 
@@ -63,7 +67,7 @@ $is_active = $row['is_active'] ?? 1;
 
                         <div class="col-md-4">
                             <label>Type</label>
-                            <select name="type_id" class="form-control">
+                            <select name="type_id" class="form-control" required>
                                 <option value="">Select Type</option>
                                 <?php
                                 $res = $db_handle->conn->query("SELECT * FROM rt_resource_types");
@@ -82,7 +86,7 @@ $is_active = $row['is_active'] ?? 1;
 
                         <div class="col-md-4">
                             <label>Department</label>
-                            <select name="department_id" class="form-control">
+                            <select name="department_id" class="form-control" required>
                                 <option value="">Select Department</option>
                                 <?php
                                 $res = $db_handle->conn->query("SELECT * FROM rt_department_master");
