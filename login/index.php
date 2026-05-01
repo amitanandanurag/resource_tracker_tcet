@@ -85,7 +85,6 @@ include_once("../database/db_connect.php");
     background: rgba(255,255,255,0.55);
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-
     display: flex;            /* 👇 helps align content nicely */
     flex-direction: column;
     justify-content: center;  /* center content vertically */
@@ -132,6 +131,8 @@ include_once("../database/db_connect.php");
 .icon1 label {
     font-size: 14px;
     font-weight: 500;
+    font-style: bold;
+    font-weight: 100;
     display: block;
     margin-bottom: 6px;
     font-style: bold;
@@ -215,6 +216,9 @@ form {
     font-size: 13px;
     margin-top: 10px;
 }
+#loginBox{
+    margin-top: 60px;
+}
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
@@ -273,7 +277,7 @@ form {
 
 
 <div class="w3layouts-main"> 
-    <div class="bg-layer"><br/><br/><br/><br/><br/>
+    <div class="bg-layer">
         <div id="loginBox">
             <div class="main-icon">
                 <img src="images/school_logo.jpg" alt="logo" width='150px' height='150px'>
@@ -295,7 +299,7 @@ form {
                      <button type="submit" class="btn" name="login_button" id="login_button">Login</button>
 
                     <div class="forgot">
-                        <a href="#">Forgot password?</a>
+                        <a href="forgot_password.php">Forgot password?</a>
                     </div>
                     <div class="register">
                         <a href="javascript:void(0)" onclick="openRegister()">
