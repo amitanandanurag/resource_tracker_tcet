@@ -30,9 +30,14 @@ if (isset($_POST['reset_btn'])) {
 
             // 🔐 Generate token
             $token = bin2hex(random_bytes(50));
+            $expiry = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
         // Save token
-        $db_handle->query("UPDATE rt_login SET reset_token='$token' WHERE user_id='$user_id'");
+        $db_handle->query("
+            UPDATE rt_login 
+            SET reset_token='$token', token_expiry='$expiry' 
+            WHERE user_id='$user_id'
+        ");
 
         // Create reset link
         $link = "http://localhost/ResourceTracker/login/reset_password.php?token=$token";

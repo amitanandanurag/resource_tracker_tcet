@@ -8,13 +8,21 @@ if (!isset($_GET['token'])) {
 
 $token = $_GET['token'];
 
-$check = $db_handle->query("SELECT user_id FROM rt_login WHERE reset_token='$token'");
+$check = $db_handle->query("
+    SELECT user_id, token_expiry 
+    FROM rt_login 
+    WHERE reset_token='$token'
+");
 
 if (!$check || mysqli_num_rows($check) == 0) {
     die("Invalid or expired link");
 }
 
 $row = mysqli_fetch_assoc($check);
+if (strtotime($row['token_expiry']) < time()) {
+    die("⏰ Link expired. Please request a new one.");
+}
+
 $user_id = $row['user_id'];
 
 if (isset($_POST['update_btn'])) {
@@ -22,7 +30,7 @@ if (isset($_POST['update_btn'])) {
     $password = $_POST['password'];
 
     // ❗ No hashing (as you requested)
-    $db_handle->query("UPDATE rt_login SET password='$password', reset_token=NULL WHERE user_id='$user_id'");
+    $db_handle->query("UPDATE rt_login SET password='$password', reset_token=NULL, token_expiry=NULL WHERE user_id='$user_id'");
 
     header("Location: index.php");
     exit();
