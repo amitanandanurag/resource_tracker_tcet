@@ -41,7 +41,7 @@ if (isset($_POST['register'])) {
 
                 $user_id = mysqli_insert_id($db_handle->conn);
 
-                $sql2 = "INSERT INTO rt_login(username,password,role_id,user_id)
+                $sql2 = "INSERT INTO rt_login(username,password, role_id, user_id)
                          VALUES('$email','$password','$role_id','$user_id')";
 
                 if ($db_handle->query($sql2)) {
@@ -51,11 +51,14 @@ if (isset($_POST['register'])) {
                     //header("Location: index.php");
                     //exit();
                     //echo "<script>
-                       //alert('Registration Successful!');
+                       //
                        //window.top.location.replace('index.php');
                    // </script>";
                     //exit();
-                    echo "<script>window.top.location.href='index.php';</script>";
+                    
+                    echo "<script>
+                    alert('Registration Successful!');
+                    window.top.location.href='index.php';</script>";
                     exit();
 
                 } else {
