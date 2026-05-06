@@ -99,13 +99,7 @@ $profileData = array(
 );
 
 if ($currentUserId > 0 && $currentRoleId > 0) {
-  $profileSql = "SELECT l.username, r.role_name, u.user_name, u.email_id, u.phone_number, d.department_name
-                 FROM rt_login l
-                 LEFT JOIN rt_role_master r ON r.role_id = l.role_id
-                 LEFT JOIN rt_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id
-                 LEFT JOIN rt_department_master d ON d.department_id = u.department_id
-                 WHERE l.user_id = ? AND l.role_id = ?
-                 LIMIT 1";
+  $profileSql = "SELECT l.username, r.role_name, u.first_name, u.email_id, u.phone_number, d.department_name FROM rt_login l LEFT JOIN rt_role_master r ON r.role_id = l.role_id LEFT JOIN rt_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id LEFT JOIN rt_department_master d ON d.department_id = u.department_id WHERE l.user_id = ? AND l.role_id = ? LIMIT 1;";
   $profileStmt = mysqli_prepare($db_handle->conn, $profileSql);
 
   if ($profileStmt) {

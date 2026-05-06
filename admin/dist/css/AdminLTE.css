@@ -209,6 +209,7 @@ a:focus {
   border: none;
   min-height: 50px;
   border-radius: 0;
+  background-color: #6f42c1
 }
 .layout-top-nav .main-header .navbar {
   margin-left: 0;
@@ -304,6 +305,7 @@ a:focus {
   padding: 0 15px;
   font-weight: 300;
   overflow: hidden;
+  background-color: #5a32a3 !important;
 }
 .main-header .logo .logo-lg {
   display: block;
