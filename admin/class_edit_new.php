@@ -7,7 +7,7 @@
 	if (isset($_REQUEST['id'])) {
 
 		$id = intval($_REQUEST['id']);
-		$result=$db_handle->conn->query("SELECT * FROM st_class_master WHERE class_id='$id'");
+		$result=$db_handle->conn->query("SELECT * FROM rt_class_master WHERE class_id='$id'");
 
 	while($row=$result->fetch_assoc()){
                     $b_id = $row['class_id'];

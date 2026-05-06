@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password']) &&
     $passwordAlertType = 'warning';
     $passwordAlertMessage = 'New password and confirm password must match.';
   } else {
-    $loginSql = "SELECT password FROM st_login WHERE user_id = ? AND role_id = ? LIMIT 1";
+    $loginSql = "SELECT password FROM rt_login WHERE user_id = ? AND role_id = ? LIMIT 1";
     $loginStmt = mysqli_prepare($db_handle->conn, $loginSql);
 
     if ($loginStmt) {
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password']) &&
         $passwordAlertType = 'danger';
         $passwordAlertMessage = 'Current password is incorrect.';
       } else {
-        $updateSql = "UPDATE st_login SET password = ? WHERE user_id = ? AND role_id = ?";
+        $updateSql = "UPDATE rt_login SET password = ? WHERE user_id = ? AND role_id = ?";
         $updateStmt = mysqli_prepare($db_handle->conn, $updateSql);
         if ($updateStmt) {
           mysqli_stmt_bind_param($updateStmt, 'sii', $newPassword, $currentUserId, $currentRoleId);
@@ -73,8 +73,8 @@ $passwordData = array(
 
 if ($currentUserId > 0 && $currentRoleId > 0) {
   $profileSql = "SELECT l.username, r.role_name
-                 FROM st_login l
-                 LEFT JOIN st_role_master r ON r.role_id = l.role_id
+                 FROM rt_login l
+                 LEFT JOIN rt_role_master r ON r.role_id = l.role_id
                  WHERE l.user_id = ? AND l.role_id = ?
                  LIMIT 1";
   $profileStmt = mysqli_prepare($db_handle->conn, $profileSql);

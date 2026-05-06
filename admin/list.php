@@ -31,7 +31,7 @@ function fetchStudents($db) {
             ELSE 'N/A'
         END as mobile
     FROM dsms_student_master s
-    LEFT JOIN st_department_master d ON s.department_id = d.department_id
+    LEFT JOIN rt_department_master d ON s.department_id = d.department_id
     WHERE s.status = 1
     ORDER BY s.std_id";
     
@@ -62,9 +62,9 @@ function fetchUsers($db) {
             WHEN s.mobile IS NOT NULL AND s.mobile != '' THEN s.mobile
             ELSE 'N/A'
         END as mobile
-    FROM st_login l
-    LEFT JOIN st_role_master r ON l.role_id = r.role_id
-    LEFT JOIN st_department_master d ON l.user_id = d.department_id
+    FROM rt_login l
+    LEFT JOIN rt_role_master r ON l.role_id = r.role_id
+    LEFT JOIN rt_department_master d ON l.user_id = d.department_id
     LEFT JOIN dsms_student_master s ON s.std_id = l.user_id
     ORDER BY l.login_id";
     
@@ -90,7 +90,7 @@ function fetchBranches($db) {
         UPPER(SUBSTRING(d.department_name, 1, LOCATE(' ', d.department_name) - 1)) as code,
         'HOD' as hod,
         (SELECT COUNT(*) FROM dsms_student_master WHERE department_id = d.department_id AND status = 1) as students_count
-    FROM st_department_master d
+    FROM rt_department_master d
     ORDER BY d.department_id";
     
     $result = mysqli_query($db->conn, $query);
@@ -114,13 +114,13 @@ function fetchMentors($db) {
         l.username as name,
         l.username as email,
         d.department_name as department,
-        (SELECT COUNT(*) FROM st_mentor_student_mapping WHERE mentor_id = l.user_id) as students_assigned,
+        (SELECT COUNT(*) FROM rt_mentor_student_mapping WHERE mentor_id = l.user_id) as students_assigned,
         CASE 
             WHEN s.mobile IS NOT NULL AND s.mobile != '' THEN s.mobile
             ELSE 'N/A'
         END as mobile
-    FROM st_login l
-    LEFT JOIN st_department_master d ON l.user_id = d.department_id
+    FROM rt_login l
+    LEFT JOIN rt_department_master d ON l.user_id = d.department_id
     LEFT JOIN dsms_student_master s ON s.std_id = l.user_id
     WHERE l.role_id IN (3, 4)
     ORDER BY l.login_id";

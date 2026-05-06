@@ -13,11 +13,11 @@ $branches_query = "SELECT
         THEN UPPER(SUBSTRING(d.department_name, 1, LOCATE(' ', d.department_name) - 1))
         ELSE UPPER(d.department_name)
     END as code,
-    (SELECT COUNT(*) FROM st_student_master WHERE department_id = d.department_id AND status = 0
+    (SELECT COUNT(*) FROM rt_student_master WHERE department_id = d.department_id AND status = 0
     ) as total_students,
-    (SELECT COUNT(*) FROM st_login WHERE user_id = d.department_id AND role_id = 2) as total_hods,
-    (SELECT COUNT(*) FROM st_login WHERE user_id = d.department_id AND role_id IN (3,4)) as total_staff
-FROM st_department_master d
+    (SELECT COUNT(*) FROM rt_login WHERE user_id = d.department_id AND role_id = 2) as total_hods,
+    (SELECT COUNT(*) FROM rt_login WHERE user_id = d.department_id AND role_id IN (3,4)) as total_staff
+FROM rt_department_master d
 ORDER BY d.department_id";
 
 $branches_result = mysqli_query($db_handle->conn, $branches_query);

@@ -6,7 +6,7 @@ $db_handle = new DBController();
 $id=$_POST["class_id"];
 $class_name = ucwords(rtrim(ltrim($_POST["class_name"])));
 
-    $sql = "UPDATE `st_class_master` SET `class_name`='$class_name' WHERE class_id='$id'";
+    $sql = "UPDATE `rt_class_master` SET `class_name`='$class_name' WHERE class_id='$id'";
 
     $result = mysqli_query($db_handel->conn, $sql);
 

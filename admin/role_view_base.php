@@ -9,7 +9,7 @@ if ($userId <= 0) {
   exit;
 }
 
-$sql = "SELECT u.user_name, u.email_id, u.phone_number, d.department_name, r.role_name FROM st_user_master u LEFT JOIN st_department_master d ON d.department_id = u.department_id LEFT JOIN st_role_master r ON r.role_id = u.role_id WHERE u.user_id = $userId AND u.role_id = " . intval($roleId) . " LIMIT 1";
+$sql = "SELECT u.user_name, u.email_id, u.phone_number, d.department_name, r.role_name FROM rt_user_master u LEFT JOIN rt_department_master d ON d.department_id = u.department_id LEFT JOIN rt_role_master r ON r.role_id = u.role_id WHERE u.user_id = $userId AND u.role_id = " . intval($roleId) . " LIMIT 1";
 $result = $db_handle->query($sql);
 $row = $result ? $result->fetch_assoc() : null;
 

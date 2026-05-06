@@ -3,25 +3,25 @@
 $masters = array(
   'class' => array(
     'title' => 'Class',
-    'table' => 'st_class_master',
+    'table' => 'rt_class_master',
     'pk' => 'class_id',
     'name' => 'class_name'
   ),
   'section' => array(
     'title' => 'Section',
-    'table' => 'st_section_master',
+    'table' => 'rt_section_master',
     'pk' => 'id',
     'name' => 'sections'
   ),
   'department' => array(
     'title' => 'Department',
-    'table' => 'st_department_master',
+    'table' => 'rt_department_master',
     'pk' => 'department_id',
     'name' => 'department_name'
   ),
   'menu' => array(
     'title' => 'Menu',
-    'table' => 'st_menu_master',
+    'table' => 'rt_menu_master',
     'pk' => 'menu_id',
     'name' => 'menu_name'
   )
@@ -154,19 +154,19 @@ function ensure_menu_metadata_columns($conn)
 {
   $columnChecks = array(
     array(
-      'table' => 'st_menu_master',
+      'table' => 'rt_menu_master',
       'column' => 'menu_icon',
-      'alter' => "ALTER TABLE st_menu_master ADD COLUMN menu_icon VARCHAR(100) NOT NULL DEFAULT 'fa fa-folder' AFTER menu_name"
+      'alter' => "ALTER TABLE rt_menu_master ADD COLUMN menu_icon VARCHAR(100) NOT NULL DEFAULT 'fa fa-folder' AFTER menu_name"
     ),
     array(
-      'table' => 'st_sub_menu_master',
+      'table' => 'rt_sub_menu_master',
       'column' => 'sub_menu_icon',
-      'alter' => "ALTER TABLE st_sub_menu_master ADD COLUMN sub_menu_icon VARCHAR(100) NOT NULL DEFAULT 'fa fa-angle-double-right' AFTER sub_menu_name"
+      'alter' => "ALTER TABLE rt_sub_menu_master ADD COLUMN sub_menu_icon VARCHAR(100) NOT NULL DEFAULT 'fa fa-angle-double-right' AFTER sub_menu_name"
     ),
     array(
-      'table' => 'st_sub_menu_master',
+      'table' => 'rt_sub_menu_master',
       'column' => 'sub_menu_route',
-      'alter' => "ALTER TABLE st_sub_menu_master ADD COLUMN sub_menu_route VARCHAR(255) NOT NULL DEFAULT '#' AFTER sub_menu_icon"
+      'alter' => "ALTER TABLE rt_sub_menu_master ADD COLUMN sub_menu_route VARCHAR(255) NOT NULL DEFAULT '#' AFTER sub_menu_icon"
     )
   );
 
@@ -186,14 +186,14 @@ function ensure_menu_metadata_columns($conn)
     }
   }
 
-  $menuResult = mysqli_query($conn, "SELECT menu_id, menu_name, menu_icon FROM st_menu_master");
+  $menuResult = mysqli_query($conn, "SELECT menu_id, menu_name, menu_icon FROM rt_menu_master");
   if ($menuResult) {
     while ($menuRow = mysqli_fetch_assoc($menuResult)) {
       $menuId = intval($menuRow['menu_id']);
       $menuIcon = trim((string) ($menuRow['menu_icon'] ?? ''));
       if ($menuIcon === '') {
         $menuIcon = get_default_menu_icon($menuRow['menu_name'] ?? '');
-        $updateStmt = mysqli_prepare($conn, "UPDATE st_menu_master SET menu_icon = ? WHERE menu_id = ?");
+        $updateStmt = mysqli_prepare($conn, "UPDATE rt_menu_master SET menu_icon = ? WHERE menu_id = ?");
         if ($updateStmt) {
           mysqli_stmt_bind_param($updateStmt, 'si', $menuIcon, $menuId);
           mysqli_stmt_execute($updateStmt);
@@ -204,7 +204,7 @@ function ensure_menu_metadata_columns($conn)
     mysqli_free_result($menuResult);
   }
 
-  $subMenuResult = mysqli_query($conn, "SELECT sub_menu_id, sub_menu_name, sub_menu_icon, sub_menu_route FROM st_sub_menu_master");
+  $subMenuResult = mysqli_query($conn, "SELECT sub_menu_id, sub_menu_name, sub_menu_icon, sub_menu_route FROM rt_sub_menu_master");
   if ($subMenuResult) {
     while ($subMenuRow = mysqli_fetch_assoc($subMenuResult)) {
       $subMenuId = intval($subMenuRow['sub_menu_id']);
@@ -222,7 +222,7 @@ function ensure_menu_metadata_columns($conn)
       }
 
       if ($needsUpdate) {
-        $updateStmt = mysqli_prepare($conn, "UPDATE st_sub_menu_master SET sub_menu_icon = ?, sub_menu_route = ? WHERE sub_menu_id = ?");
+        $updateStmt = mysqli_prepare($conn, "UPDATE rt_sub_menu_master SET sub_menu_icon = ?, sub_menu_route = ? WHERE sub_menu_id = ?");
         if ($updateStmt) {
           mysqli_stmt_bind_param($updateStmt, 'ssi', $subMenuIcon, $subMenuRoute, $subMenuId);
           mysqli_stmt_execute($updateStmt);
@@ -238,7 +238,7 @@ function ensure_parent_menu_allocation_for_roles($conn, $menuId)
 {
   $roleIds = array(1, 2, 3, 4);
   foreach ($roleIds as $roleId) {
-    $checkSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = ? AND menu_id = ? AND sub_menu_id IS NULL LIMIT 1";
+    $checkSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = ? AND menu_id = ? AND sub_menu_id IS NULL LIMIT 1";
     $checkStmt = mysqli_prepare($conn, $checkSql);
 
     if ($checkStmt) {
@@ -249,7 +249,7 @@ function ensure_parent_menu_allocation_for_roles($conn, $menuId)
       mysqli_stmt_close($checkStmt);
 
       if (!$exists) {
-        $insertSql = "INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, ?, ?, NULL)";
+        $insertSql = "INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, ?, ?, NULL)";
         $insertStmt = mysqli_prepare($conn, $insertSql);
         if ($insertStmt) {
           mysqli_stmt_bind_param($insertStmt, 'ii', $roleId, $menuId);
@@ -267,7 +267,7 @@ function ensure_sub_menu_allocation_for_roles($conn, $menuId, $subMenuId)
   ensure_parent_menu_allocation_for_roles($conn, $menuId);
 
   foreach ($roleIds as $roleId) {
-    $checkSql = "SELECT 1 FROM st_menu_allocation_master WHERE user_id = 0 AND role_id = ? AND menu_id = ? AND sub_menu_id = ? LIMIT 1";
+    $checkSql = "SELECT 1 FROM rt_menu_allocation_master WHERE user_id = 0 AND role_id = ? AND menu_id = ? AND sub_menu_id = ? LIMIT 1";
     $checkStmt = mysqli_prepare($conn, $checkSql);
 
     if ($checkStmt) {
@@ -278,7 +278,7 @@ function ensure_sub_menu_allocation_for_roles($conn, $menuId, $subMenuId)
       mysqli_stmt_close($checkStmt);
 
       if (!$exists) {
-        $insertSql = "INSERT INTO st_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, ?, ?, ?)";
+        $insertSql = "INSERT INTO rt_menu_allocation_master (user_id, role_id, menu_id, sub_menu_id) VALUES (0, ?, ?, ?)";
         $insertStmt = mysqli_prepare($conn, $insertSql);
         if ($insertStmt) {
           mysqli_stmt_bind_param($insertStmt, 'iii', $roleId, $menuId, $subMenuId);
@@ -293,7 +293,7 @@ function ensure_sub_menu_allocation_for_roles($conn, $menuId, $subMenuId)
 function normalize_sub_menu_sequence_by_menu($conn)
 {
   $menuIds = array();
-  $menuResult = mysqli_query($conn, "SELECT menu_id FROM st_menu_master ORDER BY menu_id ASC");
+  $menuResult = mysqli_query($conn, "SELECT menu_id FROM rt_menu_master ORDER BY menu_id ASC");
   if ($menuResult) {
     while ($menuRow = mysqli_fetch_assoc($menuResult)) {
       $menuId = (int) ($menuRow['menu_id'] ?? 0);
@@ -306,7 +306,7 @@ function normalize_sub_menu_sequence_by_menu($conn)
 
   foreach ($menuIds as $menuId) {
     $subSql = "SELECT sub_menu_id, COALESCE(sort_order, 0) AS sort_order
-               FROM st_sub_menu_master
+               FROM rt_sub_menu_master
                WHERE menu_id = ?
                ORDER BY sort_order ASC, sub_menu_id ASC";
     $subStmt = mysqli_prepare($conn, $subSql);
@@ -324,7 +324,7 @@ function normalize_sub_menu_sequence_by_menu($conn)
       $currentOrder = (int) ($subRow['sort_order'] ?? 0);
 
       if ($subMenuId > 0 && $currentOrder !== $expectedOrder) {
-        $updateSql = "UPDATE st_sub_menu_master SET sort_order = ? WHERE sub_menu_id = ?";
+        $updateSql = "UPDATE rt_sub_menu_master SET sort_order = ? WHERE sub_menu_id = ?";
         $updateStmt = mysqli_prepare($conn, $updateSql);
         if ($updateStmt) {
           mysqli_stmt_bind_param($updateStmt, 'ii', $expectedOrder, $subMenuId);
@@ -523,8 +523,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['master_action'], $_PO
           $ok = true;
 
           $deleteAllocBySubSql = "DELETE ma
-                                 FROM st_menu_allocation_master ma
-                                 INNER JOIN st_sub_menu_master sm ON sm.sub_menu_id = ma.sub_menu_id
+                                 FROM rt_menu_allocation_master ma
+                                 INNER JOIN rt_sub_menu_master sm ON sm.sub_menu_id = ma.sub_menu_id
                                  WHERE sm.menu_id = ?";
           $deleteAllocBySubStmt = mysqli_prepare($db_handle->conn, $deleteAllocBySubSql);
           if ($deleteAllocBySubStmt) {
@@ -536,7 +536,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['master_action'], $_PO
           }
 
           if ($ok) {
-            $deleteAllocSql = "DELETE FROM st_menu_allocation_master WHERE menu_id = ?";
+            $deleteAllocSql = "DELETE FROM rt_menu_allocation_master WHERE menu_id = ?";
             $deleteAllocStmt = mysqli_prepare($db_handle->conn, $deleteAllocSql);
             if ($deleteAllocStmt) {
               mysqli_stmt_bind_param($deleteAllocStmt, 'i', $id);
@@ -548,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['master_action'], $_PO
           }
 
           if ($ok) {
-            $deleteSubMenuSql = "DELETE FROM st_sub_menu_master WHERE menu_id = ?";
+            $deleteSubMenuSql = "DELETE FROM rt_sub_menu_master WHERE menu_id = ?";
             $deleteSubMenuStmt = mysqli_prepare($db_handle->conn, $deleteSubMenuSql);
             if ($deleteSubMenuStmt) {
               mysqli_stmt_bind_param($deleteSubMenuStmt, 'i', $id);
@@ -560,7 +560,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['master_action'], $_PO
           }
 
           if ($ok) {
-            $deleteMenuSql = "DELETE FROM st_menu_master WHERE menu_id = ?";
+            $deleteMenuSql = "DELETE FROM rt_menu_master WHERE menu_id = ?";
             $deleteMenuStmt = mysqli_prepare($db_handle->conn, $deleteMenuSql);
             if ($deleteMenuStmt) {
               mysqli_stmt_bind_param($deleteMenuStmt, 'i', $id);
@@ -639,7 +639,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
       $alertType = 'warning';
       $alertMessage = 'Menu and sub menu name are required.';
     } else {
-      $dupSql = "SELECT COUNT(*) AS cnt FROM st_sub_menu_master WHERE menu_id = ? AND LOWER(TRIM(sub_menu_name)) = LOWER(TRIM(?))";
+      $dupSql = "SELECT COUNT(*) AS cnt FROM rt_sub_menu_master WHERE menu_id = ? AND LOWER(TRIM(sub_menu_name)) = LOWER(TRIM(?))";
       $dupStmt = mysqli_prepare($db_handle->conn, $dupSql);
 
       if ($dupStmt) {
@@ -654,7 +654,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
           $alertMessage = 'Sub menu already exists under selected menu.';
         } else {
           if ($sortOrder <= 0) {
-            $sortSql = "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM st_sub_menu_master WHERE menu_id = ?";
+            $sortSql = "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM rt_sub_menu_master WHERE menu_id = ?";
             $sortStmt = mysqli_prepare($db_handle->conn, $sortSql);
             if ($sortStmt) {
               mysqli_stmt_bind_param($sortStmt, 'i', $menuId);
@@ -666,7 +666,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
             }
           }
 
-          $insertSql = "INSERT INTO st_sub_menu_master (menu_id, sub_menu_name, sort_order, sub_menu_icon, sub_menu_route) VALUES (?, ?, ?, ?, ?)";
+          $insertSql = "INSERT INTO rt_sub_menu_master (menu_id, sub_menu_name, sort_order, sub_menu_icon, sub_menu_route) VALUES (?, ?, ?, ?, ?)";
           $insertStmt = mysqli_prepare($db_handle->conn, $insertSql);
 
           if ($insertStmt) {
@@ -683,7 +683,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
               $openAddSubMenuModal = false;
               $shouldSyncSidebar = true;
               if ($isAjaxRequest) {
-                $menuNameSql = $db_handle->conn->prepare("SELECT menu_name FROM st_menu_master WHERE menu_id = ?");
+                $menuNameSql = $db_handle->conn->prepare("SELECT menu_name FROM rt_menu_master WHERE menu_id = ?");
                 $menuName = '';
                 if ($menuNameSql) {
                   $menuNameSql->bind_param('i', $menuId);
@@ -742,7 +742,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
       $alertType = 'warning';
       $alertMessage = 'Valid sub menu details are required for update.';
     } else {
-      $dupSql = "SELECT COUNT(*) AS cnt FROM st_sub_menu_master WHERE menu_id = ? AND LOWER(TRIM(sub_menu_name)) = LOWER(TRIM(?)) AND sub_menu_id <> ?";
+      $dupSql = "SELECT COUNT(*) AS cnt FROM rt_sub_menu_master WHERE menu_id = ? AND LOWER(TRIM(sub_menu_name)) = LOWER(TRIM(?)) AND sub_menu_id <> ?";
       $dupStmt = mysqli_prepare($db_handle->conn, $dupSql);
 
       if ($dupStmt) {
@@ -756,7 +756,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
           $alertType = 'warning';
           $alertMessage = 'Sub menu already exists under selected menu.';
         } else {
-          $updateSql = "UPDATE st_sub_menu_master SET menu_id = ?, sub_menu_name = ?, sort_order = ?, sub_menu_icon = ?, sub_menu_route = ? WHERE sub_menu_id = ?";
+          $updateSql = "UPDATE rt_sub_menu_master SET menu_id = ?, sub_menu_name = ?, sort_order = ?, sub_menu_icon = ?, sub_menu_route = ? WHERE sub_menu_id = ?";
           $updateStmt = mysqli_prepare($db_handle->conn, $updateSql);
 
           if ($updateStmt) {
@@ -765,7 +765,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
             mysqli_stmt_close($updateStmt);
 
             if ($ok) {
-              $syncSql = "UPDATE st_menu_allocation_master SET menu_id = ? WHERE sub_menu_id = ?";
+              $syncSql = "UPDATE rt_menu_allocation_master SET menu_id = ? WHERE sub_menu_id = ?";
               $syncStmt = mysqli_prepare($db_handle->conn, $syncSql);
               if ($syncStmt) {
                 mysqli_stmt_bind_param($syncStmt, 'ii', $menuId, $subMenuId);
@@ -801,7 +801,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
           $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
         }
     } else {
-      $allocDeleteSql = "DELETE FROM st_menu_allocation_master WHERE sub_menu_id = ?";
+      $allocDeleteSql = "DELETE FROM rt_menu_allocation_master WHERE sub_menu_id = ?";
       $allocDeleteStmt = mysqli_prepare($db_handle->conn, $allocDeleteSql);
       if ($allocDeleteStmt) {
         mysqli_stmt_bind_param($allocDeleteStmt, 'i', $subMenuId);
@@ -809,7 +809,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
         mysqli_stmt_close($allocDeleteStmt);
       }
 
-      $deleteSql = "DELETE FROM st_sub_menu_master WHERE sub_menu_id = ?";
+      $deleteSql = "DELETE FROM rt_sub_menu_master WHERE sub_menu_id = ?";
       $deleteStmt = mysqli_prepare($db_handle->conn, $deleteSql);
 
       if ($deleteStmt) {
@@ -881,7 +881,7 @@ foreach ($masters as $type => $meta) {
 }
 
 $menuOptions = array();
-$menuResult = $db_handle->conn->query("SELECT menu_id, menu_name, COALESCE(NULLIF(TRIM(menu_icon), ''), 'fa fa-folder') AS menu_icon FROM st_menu_master ORDER BY menu_name ASC");
+$menuResult = $db_handle->conn->query("SELECT menu_id, menu_name, COALESCE(NULLIF(TRIM(menu_icon), ''), 'fa fa-folder') AS menu_icon FROM rt_menu_master ORDER BY menu_name ASC");
 if ($menuResult) {
   while ($menuRow = $menuResult->fetch_assoc()) {
     $menuOptions[] = $menuRow;
@@ -889,7 +889,7 @@ if ($menuResult) {
 }
 
 $subMenuRows = array();
-$subMenuResult = $db_handle->conn->query("SELECT sm.sub_menu_id, sm.menu_id, sm.sub_menu_name, sm.sort_order, COALESCE(NULLIF(TRIM(sm.sub_menu_icon), ''), 'fa fa-angle-double-right') AS sub_menu_icon, COALESCE(NULLIF(TRIM(sm.sub_menu_route), ''), '#') AS sub_menu_route, m.menu_name FROM st_sub_menu_master sm INNER JOIN st_menu_master m ON m.menu_id = sm.menu_id ORDER BY m.menu_name ASC, sm.sort_order ASC, sm.sub_menu_id ASC");
+$subMenuResult = $db_handle->conn->query("SELECT sm.sub_menu_id, sm.menu_id, sm.sub_menu_name, sm.sort_order, COALESCE(NULLIF(TRIM(sm.sub_menu_icon), ''), 'fa fa-angle-double-right') AS sub_menu_icon, COALESCE(NULLIF(TRIM(sm.sub_menu_route), ''), '#') AS sub_menu_route, m.menu_name FROM rt_sub_menu_master sm INNER JOIN rt_menu_master m ON m.menu_id = sm.menu_id ORDER BY m.menu_name ASC, sm.sort_order ASC, sm.sub_menu_id ASC");
 if ($subMenuResult) {
   while ($subMenuRow = $subMenuResult->fetch_assoc()) {
     $subMenuRows[] = $subMenuRow;

@@ -24,9 +24,9 @@ $emailEsc = mysqli_real_escape_string($db_handle->conn, $emailId);
 $phoneEsc = mysqli_real_escape_string($db_handle->conn, $phoneNumber);
 
 if ($userId > 0) {
-  $dupSql = "SELECT user_id FROM st_user_master WHERE email_id = '$emailEsc' AND user_id != $userId LIMIT 1";
+  $dupSql = "SELECT user_id FROM rt_user_master WHERE email_id = '$emailEsc' AND user_id != $userId LIMIT 1";
 } else {
-  $dupSql = "SELECT user_id FROM st_user_master WHERE email_id = '$emailEsc' LIMIT 1";
+  $dupSql = "SELECT user_id FROM rt_user_master WHERE email_id = '$emailEsc' LIMIT 1";
 }
 $dupResult = $db_handle->query($dupSql);
 if ($dupResult && $dupResult->num_rows > 0) {
@@ -35,9 +35,9 @@ if ($dupResult && $dupResult->num_rows > 0) {
 }
 
 if ($userId > 0) {
-  $sql = "UPDATE st_user_master SET user_name='$userNameEsc', email_id='$emailEsc', phone_number='$phoneEsc', department_id=$departmentId WHERE user_id=$userId AND role_id=" . intval($roleId);
+  $sql = "UPDATE rt_user_master SET user_name='$userNameEsc', email_id='$emailEsc', phone_number='$phoneEsc', department_id=$departmentId WHERE user_id=$userId AND role_id=" . intval($roleId);
 } else {
-  $sql = "INSERT INTO st_user_master (user_name, email_id, phone_number, department_id, role_id, student_id) VALUES ('$userNameEsc', '$emailEsc', '$phoneEsc', $departmentId, " . intval($roleId) . ", 0)";
+  $sql = "INSERT INTO rt_user_master (user_name, email_id, phone_number, department_id, role_id, student_id) VALUES ('$userNameEsc', '$emailEsc', '$phoneEsc', $departmentId, " . intval($roleId) . ", 0)";
 }
 
 $db_handle->query($sql);

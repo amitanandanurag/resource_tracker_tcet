@@ -18,7 +18,7 @@ if ($userId <= 0) {
 	exit;
 }
 
-$sql = "SELECT * FROM st_user_master WHERE user_id = $userId AND role_id = $roleId LIMIT 1";
+$sql = "SELECT * FROM rt_user_master WHERE user_id = $userId AND role_id = $roleId LIMIT 1";
 $result = $db_handle->query($sql);
 $row = $result ? $result->fetch_assoc() : null;
 
@@ -70,7 +70,7 @@ if (!$row) {
 		<select name="department_id" class="form-control" required>
 			<option value="">Select Department</option>
 			<?php
-			$deptSql = "SELECT department_id, department_name FROM st_department_master ORDER BY department_name ASC";
+			$deptSql = "SELECT department_id, department_name FROM rt_department_master ORDER BY department_name ASC";
 			$deptResult = $db_handle->query($deptSql);
 			while ($dept = $deptResult->fetch_assoc()) {
 				$selected = (intval($row['department_id']) === intval($dept['department_id'])) ? 'selected' : '';

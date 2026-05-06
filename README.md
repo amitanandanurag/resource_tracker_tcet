@@ -1,81 +1,222 @@
-<<<<<<< HEAD
-﻿# TCET Specialization Tracker
+# 🏫 Resource Tracker System
 
-A PHP + MySQL web application for managing students and role-based users (admin, coordinator, mentor, user) in a specialization tracking workflow.
+A **web-based Resource Management System** built using **PHP, MySQL, JavaScript, and AJAX**.
+This system allows institutions to efficiently manage and allocate resources such as classrooms, laboratories, seminar halls, and auditoriums with **role-based access control (RBAC)**.
 
-## Features
+---
 
-- Student admission, listing, update, and delete flows
-- Role-specific CRUD pages for:
-  - Admin
-  - Coordinator
-  - Mentor
-  - User
-- AJAX info endpoints for role and student detail views
-- Login/logout module with session-based access flow
-- PDF-related utilities under `pdf/`
-- Organized static assets (Bootstrap, plugins, custom CSS/JS)
+## 🚀 Features
 
-## Tech Stack
+### 🔐 Authentication & Security
 
-- PHP (classic server-rendered pages)
-- MySQL / MariaDB
-- XAMPP (Apache + MySQL)
-- Bootstrap, jQuery, and related frontend plugins
+* User login system (MD5 password hashing)
+* Session-based authentication
+* Role-based access control (RBAC)
 
-## Project Structure (High Level)
+### 👥 User Roles
 
-- `index.php` - Root entry point
-- `admin/` - Main application modules (role CRUD, student pages, shared assets)
-- `database/` - Database connection and SQL dump
-- `login/` - Authentication pages and scripts
+* **Super Admin** – Full system control
+* **Admin / Facility Manager** – Resource & booking management
+* **HOD** – Department-level booking control
+* **Faculty** – Book resources
+* **Viewer (Student)** – View bookings
 
-## Prerequisites
+---
 
-- XAMPP installed
-- Apache and MySQL services running
-- PHP 7.x+ (recommended to match your XAMPP version)
+### 🏢 Resource Management
 
-## Local Setup (XAMPP)
+* Add, edit, delete resources
+* Resource types:
 
-1. Place this project folder at:
-   - `C:\xampp\htdocs\st`
-2. Start Apache and MySQL from XAMPP Control Panel.
-3. Create a database in phpMyAdmin.
-4. Import SQL dump:
-   - `database/tcet_st.sql`
-5. Update DB credentials if required in:
-   - `database/db_connect.php`
-   - `login/db_connect.php`
-6. Open in browser:
-   - `http://localhost/st/`
-   - or login module: `http://localhost/st/login/`
+  * Classroom
+  * Laboratory
+  * Auditorium
+  * Seminar Hall
+* Auto-generated resource codes (CR001, LAB002, etc.)
 
-## Default Entry Points
+---
 
-- Main app: `index.php`
-- Admin area pages: `admin/index.php` and related module pages
-- Login: `login/index.php`
+### 📅 Booking System
 
-## Notes
+* Book resources based on:
 
-- This project contains legacy-style PHP pages (non-framework).
-- Ensure write permissions are available for upload folders such as:
-  - `documents/`
-  - `emp-photos/`
-  - `student_photo/`
-- Keep database credentials private in deployment environments.
+  * Department
+  * Class (FY/SY/TY)
+  * Division (A/B/C)
+* Time-slot based booking (7:30 AM – 7:30 PM)
+* Prevent double booking
 
-## Troubleshooting
+---
 
-- If you see DB connection errors, verify host/user/password/database in both DB config files.
-- If pages load without styles/scripts, verify Apache document root and folder path under `htdocs`.
-- If login redirects fail, check session settings and PHP error logs in XAMPP.
+### ✅ Approval System
 
-## License
+* Booking approval workflow (Admin / HOD)
+* Pending / Approved / Rejected status
 
-No explicit license file is included in this repository.
-Add a `LICENSE` file if you plan to distribute this project.
-=======
-"# resource_tracker_tcet" 
->>>>>>> c1f38db6e597dcbc50e6575d5afd763eeb74083c
+---
+
+### 📊 Dashboard & Reports
+
+* View resource usage
+* Booking summary
+* Filter-based reports
+
+---
+
+### 📋 Resource Listing
+
+* DataTables integration (server-side processing)
+* Pagination, sorting, filtering
+* AJAX-based dynamic loading
+
+---
+
+### 🧭 Sidebar Navigation
+
+* Dynamic sidebar based on user role
+* Modules:
+
+  * Resources
+  * Bookings
+  * Approvals
+  * Users
+  * Reports
+  * Settings
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Usage                   |
+| ---------- | ----------------------- |
+| PHP        | Backend logic           |
+| MySQL      | Database                |
+| JavaScript | Frontend interaction    |
+| jQuery     | AJAX & DOM manipulation |
+| DataTables | Table handling          |
+| HTML/CSS   | UI design               |
+| Bootstrap  | Styling (optional)      |
+
+---
+
+## 📂 Project Structure
+
+```
+ResourceTracker/
+│
+├── admin/
+│   ├── resource_list.php
+│   ├── resource_ajax.php
+│   ├── resource_save.php
+│   ├── update_resource.php
+│   ├── resource_delete.php
+│
+├── database/
+│   ├── db_connect.php
+│
+├── login/
+│   ├── index.php
+│   ├── logout.php
+│
+├── header/
+│   ├── header.php
+│   ├── footer.php
+│
+└── assets/
+```
+
+---
+
+## ⚙️ Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/resource-tracker.git
+```
+
+2. Move to XAMPP `htdocs`:
+
+```bash
+C:\xampp\htdocs\ResourceTracker
+```
+
+3. Create database:
+
+```sql
+CREATE DATABASE tcet_rt;
+```
+
+4. Import SQL tables
+
+5. Configure database:
+
+```php
+host: localhost
+user: root
+password: ""
+database: tcet_rt
+port: 3307
+```
+
+6. Start Apache & MySQL
+
+7. Open in browser:
+
+```
+http://localhost/ResourceTracker
+```
+
+---
+
+## 🔑 Default Roles
+
+| Role        | Access                     |
+| ----------- | -------------------------- |
+| Super Admin | Full access                |
+| Admin       | Resource + Booking control |
+| HOD         | Department booking         |
+| Faculty     | Book resources             |
+| Viewer      | View only                  |
+
+---
+
+## 🧠 Key Concepts
+
+* RBAC (Role-Based Access Control)
+* AJAX-based DataTables
+* Soft delete (is_active flag)
+* Auto-generated codes
+* Clean MVC-like structure
+
+---
+
+## 🔒 Security Notes
+
+* Passwords stored using MD5 (for academic use)
+* Use `password_hash()` for production
+* Input sanitization implemented
+
+---
+
+## 🚀 Future Enhancements
+
+* Email notifications
+* Calendar view (timetable)
+* Resource availability heatmap
+* Mobile responsive UI
+* API integration
+
+---
+
+## 👨‍💻 Author
+
+**Tilak Gupta**
+
+---
+
+## 📜 License
+
+This project is for **educational purposes**.
+
+---

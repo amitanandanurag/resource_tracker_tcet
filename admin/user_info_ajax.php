@@ -19,14 +19,14 @@ $columns = array(
   6 => 'u.user_id'
 );
 
-$baseSql = "SELECT u.user_id, u.user_name, u.email_id, u.phone_number, d.department_name, r.role_name FROM st_user_master u LEFT JOIN st_department_master d ON d.department_id = u.department_id LEFT JOIN st_role_master r ON r.role_id = u.role_id WHERE u.role_id = $roleId";
+$baseSql = "SELECT u.user_id, u.user_name, u.email_id, u.phone_number, d.department_name, r.role_name FROM rt_user_master u LEFT JOIN rt_department_master d ON d.department_id = u.department_id LEFT JOIN rt_role_master r ON r.role_id = u.role_id WHERE u.role_id = $roleId";
 
 if (!empty($requestData['search']['value'])) {
   $search = mysqli_real_escape_string($db_handle->conn, $requestData['search']['value']);
   $baseSql .= " AND (u.user_name LIKE '%$search%' OR u.email_id LIKE '%$search%' OR u.phone_number LIKE '%$search%' OR d.department_name LIKE '%$search%')";
 }
 
-$totalData = $db_handle->numRows("SELECT user_id FROM st_user_master WHERE role_id = $roleId");
+$totalData = $db_handle->numRows("SELECT user_id FROM rt_user_master WHERE role_id = $roleId");
 $totalFiltered = $db_handle->numRows($baseSql);
 
 $orderColumnIndex = isset($requestData['order'][0]['column']) ? intval($requestData['order'][0]['column']) : 0;

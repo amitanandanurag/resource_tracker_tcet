@@ -59,7 +59,7 @@
                 <select name="department_id" class="form-control" required>
                   <option value="">Select Department</option>
                   <?php
-                  $deptSql = "SELECT department_id, department_name FROM st_department_master ORDER BY department_name ASC";
+                  $deptSql = "SELECT department_id, department_name FROM rt_department_master ORDER BY department_name ASC";
                   $deptResult = $db_handle->query($deptSql);
                   while ($dept = $deptResult->fetch_assoc()) {
                   ?>
