@@ -103,3 +103,6 @@ class DBController
 
 }
 ?>
+<?php
+$db_handle = new DBController();
+?>
