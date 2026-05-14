@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: May 06, 2026 at 12:56 PM
+-- Generation Time: May 14, 2026 at 09:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,7 +63,10 @@ CREATE TABLE `rt_bookings` (
 
 INSERT INTO `rt_bookings` (`booking_id`, `resource_id`, `booked_by_user_id`, `department_id`, `class_id`, `division_id`, `booking_date`, `slot_id`, `purpose`, `status`, `created_at`) VALUES
 (7, 4, 1, 1, 1, 2, '2026-05-07', 1, 'for mca', 'approved', '2026-05-06 07:03:10'),
-(8, 4, 1, 1, 2, 1, '2026-05-06', 7, 'for mca', 'approved', '2026-05-06 07:07:24');
+(8, 4, 1, 1, 2, 1, '2026-05-06', 7, 'for mca', 'approved', '2026-05-06 07:07:24'),
+(9, 4, 1, 1, 2, 2, '2026-05-07', 5, 'for mca', 'approved', '2026-05-07 05:58:09'),
+(10, 6, 1, 4, 2, 1, '2026-05-15', 2, '', 'approved', '2026-05-14 06:38:28'),
+(11, 4, 1, 4, 2, 2, '2026-05-14', 8, '', 'approved', '2026-05-14 07:30:10');
 
 -- --------------------------------------------------------
 
@@ -101,7 +104,10 @@ CREATE TABLE `rt_booking_approvals` (
 
 INSERT INTO `rt_booking_approvals` (`approval_id`, `booking_id`, `approver_user_id`, `decision`, `remarks`, `decided_at`) VALUES
 (2, 7, 1, 'approved', NULL, '2026-05-06 07:03:52'),
-(3, 8, 1, 'approved', NULL, '2026-05-06 07:07:48');
+(3, 8, 1, 'approved', NULL, '2026-05-06 07:07:48'),
+(4, 9, 1, 'approved', NULL, '2026-05-07 05:58:33'),
+(5, 10, 1, 'approved', NULL, '2026-05-14 06:38:57'),
+(6, 11, 1, 'approved', NULL, '2026-05-14 07:30:23');
 
 -- --------------------------------------------------------
 
@@ -263,8 +269,6 @@ CREATE TABLE `rt_menu_allocation_master` (
 --
 
 INSERT INTO `rt_menu_allocation_master` (`menu_allocation_id`, `user_id`, `role_id`, `menu_id`, `sub_menu_id`) VALUES
-(240, 0, 5, 1, 1),
-(241, 0, 5, 1, NULL),
 (256, 0, 2, 1, 1),
 (257, 0, 2, 1, NULL),
 (258, 0, 2, 1, 2),
@@ -330,7 +334,27 @@ INSERT INTO `rt_menu_allocation_master` (`menu_allocation_id`, `user_id`, `role_
 (360, 0, 2, 7, 53),
 (361, 0, 3, 7, 53),
 (362, 0, 4, 7, 53),
-(363, 0, 1, 5, 54);
+(364, 0, 1, 7, 55),
+(365, 0, 2, 7, 55),
+(366, 0, 3, 7, 55),
+(367, 0, 4, 7, 55),
+(368, 0, 1, 7, 56),
+(369, 0, 2, 7, 56),
+(370, 0, 3, 7, 56),
+(371, 0, 4, 7, 56),
+(372, 0, 1, 7, 57),
+(373, 0, 2, 7, 57),
+(374, 0, 3, 7, 57),
+(375, 0, 4, 7, 57),
+(376, 0, 1, 5, 58),
+(377, 0, 1, 5, 59),
+(378, 0, 1, 5, 60),
+(384, 0, 5, 5, 20),
+(385, 0, 5, 5, NULL),
+(386, 0, 5, 5, 21),
+(387, 0, 5, 7, 51),
+(388, 0, 5, 7, NULL),
+(389, 0, 5, 7, 57);
 
 -- --------------------------------------------------------
 
@@ -504,7 +528,7 @@ INSERT INTO `rt_role_master` (`role_id`, `role_name`) VALUES
 (1, 'SUPER ADMIN'),
 (2, 'ADMIN'),
 (3, 'COORDINATOR / HOD'),
-(4, 'MENTOR'),
+(4, 'LAB ASSISTANT'),
 (5, 'STUDENT');
 
 -- --------------------------------------------------------
@@ -580,10 +604,13 @@ INSERT INTO `rt_sub_menu_master` (`sub_menu_id`, `menu_id`, `sort_order`, `sub_m
 (48, 7, 1, 'Book Resource', 'fa fa-calendar', 'book_resource.php'),
 (49, 7, 2, 'My Bookings', 'fa fa-calendar', 'my_bookings.php'),
 (50, 7, 3, 'All Bookings', 'fa fa-calendar', 'all_bookings.php'),
-(51, 7, 4, 'Booking Calendar', 'fa fa-calendar', 'booking_calendar.php'),
-(52, 7, 5, 'Cancelled Bookings', 'fa fa-calendar', 'cancelled_bookings.php'),
-(53, 7, 6, 'Pending Bookings', 'fa fa-calendar', 'pending_bookings.php'),
-(54, 5, 8, 'Offline Marks Entry', 'fa fa-pencil-square-o', 'offline_marks_entry.php');
+(51, 7, 8, 'Booking Calendar', 'fa fa-calendar', 'booking_calendar.php'),
+(52, 7, 4, 'Cancelled Bookings', 'fa fa-calendar', 'cancelled_bookings.php'),
+(53, 7, 5, 'Pending Bookings', 'fa fa-calendar', 'pending_bookings.php'),
+(55, 7, 6, 'ACTIVE BOOKINGS', 'fa fa-history', 'active_bookings.php'),
+(56, 7, 7, 'APPROVED BOOKINGS', 'fa fa-calendar', 'approved_bookings.php'),
+(57, 7, 9, 'DEPARTMENT BOOKINGS', 'fa fa-list-alt', 'department_bookings.php'),
+(60, 5, 8, 'Offline Marks Entry', 'fa fa-pencil-square-o', 'offline_marks_entry.php');
 
 -- --------------------------------------------------------
 
@@ -854,7 +881,7 @@ ALTER TABLE `rt_audit_log`
 -- AUTO_INCREMENT for table `rt_bookings`
 --
 ALTER TABLE `rt_bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `rt_booking_analytics`
@@ -866,7 +893,7 @@ ALTER TABLE `rt_booking_analytics`
 -- AUTO_INCREMENT for table `rt_booking_approvals`
 --
 ALTER TABLE `rt_booking_approvals`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `rt_booking_cancellations`
@@ -908,7 +935,7 @@ ALTER TABLE `rt_maintenance_windows`
 -- AUTO_INCREMENT for table `rt_menu_allocation_master`
 --
 ALTER TABLE `rt_menu_allocation_master`
-  MODIFY `menu_allocation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=364;
+  MODIFY `menu_allocation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=390;
 
 --
 -- AUTO_INCREMENT for table `rt_menu_master`
@@ -974,7 +1001,7 @@ ALTER TABLE `rt_role_permissions`
 -- AUTO_INCREMENT for table `rt_sub_menu_master`
 --
 ALTER TABLE `rt_sub_menu_master`
-  MODIFY `sub_menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `sub_menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `rt_time_slots`
