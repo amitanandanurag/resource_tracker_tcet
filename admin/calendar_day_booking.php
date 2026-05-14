@@ -3,9 +3,9 @@
 require_once "../database/db_connect.php";
 session_start();
 
-header('Content-Type: application/json');
-
 $db = new DBController();
+
+$date = $_POST['booking_date'];
 
 $user_id = $_SESSION['user_session'];
 $role_id = $_SESSION['role_id'];
@@ -23,14 +23,14 @@ WHERE user_id='$user_id'
 $department_id = $userData[0]['department_id'] ?? 0;
 
 /* ===================================
-   FILTER
+   ROLE FILTER
 =================================== */
 
 $where = "";
 
 if($role_id != 1 && $role_id != 2){
 
-    $where = "WHERE b.department_id='$department_id'";
+    $where = " AND b.department_id='$department_id'";
 }
 
 /* ===================================
@@ -38,14 +38,11 @@ if($role_id != 1 && $role_id != 2){
 =================================== */
 
 $query = "
-SELECT
-    b.booking_id,
-    b.booking_date,
-    b.status,
+SELECT 
     r.resource_name,
     d.department_name,
-    t.start_time,
-    t.end_time
+    t.label,
+    b.status
 
 FROM rt_bookings b
 
@@ -57,69 +54,44 @@ ON d.department_id = b.department_id
 
 JOIN rt_time_slots t
 ON t.slot_id = b.slot_id
+
+WHERE b.booking_date='$date'
 
 $where
 
-AND b.status IN ('approved','pending')
+ORDER BY t.start_time ASC
 ";
-
-if(empty($where)){
-
-$query = "
-SELECT
-    b.booking_id,
-    b.booking_date,
-    b.status,
-    r.resource_name,
-    d.department_name,
-    t.start_time,
-    t.end_time
-
-FROM rt_bookings b
-
-JOIN rt_resources r
-ON r.resource_id = b.resource_id
-
-JOIN rt_department_master d
-ON d.department_id = b.department_id
-
-JOIN rt_time_slots t
-ON t.slot_id = b.slot_id
-
-WHERE b.status IN ('approved','pending')
-";
-}
 
 $result = $db->runQuery($query);
 
-$events = [];
+if(empty($result)){
 
-if(!empty($result)){
+    echo "<h4>No bookings found</h4>";
+    exit;
+}
 
 foreach($result as $row){
 
     if($row['status'] == 'approved'){
         $color = "#28a745";
     }
-    else{
+    else if($row['status'] == 'pending'){
         $color = "#ffc107";
     }
+    else{
+        $color = "#dc3545";
+    }
 
-    $events[] = [
+    echo "
+    <div class='booking-item' style='border-left:4px solid $color'>
+        <h4>".$row['resource_name']."</h4>
 
-        "title" => $row['resource_name']." (".$row['department_name'].")",
+        <p><b>Department:</b> ".$row['department_name']."</p>
 
-        "start" => $row['booking_date']."T".$row['start_time'],
+        <p><b>Slot:</b> ".$row['label']."</p>
 
-        "end" => $row['booking_date']."T".$row['end_time'],
-
-        "color" => $color
-    ];
+        <p><b>Status:</b> ".strtoupper($row['status'])."</p>
+    </div>
+    ";
 }
-
-}
-
-echo json_encode($events);
-exit;
-
 ?>
