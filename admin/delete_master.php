@@ -13,6 +13,6 @@ $sql = "UPDATE $table SET status = 0 WHERE $pk = '$id'";
 $conn->query($sql);
 
 // FIX: Redirect to masters.php (the dashboard with tabs) instead of masters_data.php
-header("Location: masters.php?table=$table");
+header("Location: class_crud_new.php?table=$table");
 exit();
 ?>

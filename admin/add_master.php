@@ -23,7 +23,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->query($sql);
 
     // Redirect back to dashboard
-    header("Location: masters.php?table=$table");
+    header("Location: class_crud_new.php?table=$table");
     exit();
 }
 ?>
@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h3 class="fw-bold text-dark">
                     <i class="fas fa-plus-square text-success me-2"></i>Add to <?php echo strtoupper(str_replace('_', ' ', $table)); ?>
                 </h3>
-                <a href="masters.php?table=<?php echo $table; ?>" class="btn btn-outline-secondary">
+                <a href="class_crud_new.php?table=<?php echo $table; ?>" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Back
                 </a>
             </div>
@@ -59,7 +59,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <div class="mt-3">
                             <button class="btn btn-success px-5">Save Record</button>
-                            <a href="masters.php?table=<?php echo $table; ?>" class="btn btn-link text-secondary">Cancel</a>
+                            <a href="class_crud_new.php?table=<?php echo $table; ?>" class="btn btn-link">Cancel</a>
                         </div>
                     </form>
                 </div>

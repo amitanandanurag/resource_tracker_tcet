@@ -86,9 +86,9 @@ class DBController
 
  public function loginPage($myusername, $mypassword)
   {
-    $mypassword = md5($mypassword);
+    //$mypassword = md5($mypassword);
 
-    $sql = "SELECT * FROM (SELECT * FROM user_master_activate UNION SELECT * FROM rt_user_master ) AS U WHERE U.user_name = ? and U.password = ? AND U.flag = '1' AND U.status = '1'";
+    $sql = "SELECT * FROM (SELECT * FROM user_master_activate UNION SELECT * FROM rt_user_master ) AS U WHERE U.username = ? and U.password = ? AND U.flag = '1' AND U.status = '1'";
     $stmt = $this->conn->prepare($sql);
     $stmt->bind_param("ss", $myusername, $mypassword);
     $stmt->execute();

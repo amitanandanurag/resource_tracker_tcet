@@ -218,6 +218,8 @@ form {
 }
 #loginBox{
     margin-top: 60px;
+    height: auto;      /* Change from fixed height to auto */
+    min-height: 450px;
 }
 
 /* RESPONSIVE */

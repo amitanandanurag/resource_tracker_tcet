@@ -9,7 +9,7 @@ $id = $_GET['id'];
 $col_res = $conn->query("SHOW COLUMNS FROM $table");
 $columns = [];
 
-while($col = $col_res->fetch_assoc()){
+while ($col = $col_res->fetch_assoc()) {
     $columns[] = $col['Field'];
 }
 
@@ -17,20 +17,25 @@ $pk = $columns[0];
 
 $data = $conn->query("SELECT * FROM $table WHERE $pk='$id'")->fetch_assoc();
 
-if($_POST){
+if ($_POST) {
     $updates = [];
 
-    foreach($columns as $col){
-        if($col != $pk){
-            $updates[] = "$col='".$_POST[$col]."'";
+    foreach ($columns as $col) {
+        if (
+            $col != $pk &&
+            $col != 'status' &&
+            $col != 'created_at' &&
+            $col != 'date'
+        ) {
+            $updates[] = "$col='" . $_POST[$col] . "'";
         }
     }
 
-    $sql = "UPDATE $table SET ".implode(",", $updates)." WHERE $pk='$id'";
+    $sql = "UPDATE $table SET " . implode(",", $updates) . " WHERE $pk='$id'";
     $conn->query($sql);
 
     // Redirecting back to the main dashboard (masters.php) after update
-    header("Location: masters.php?table=$table");
+    header("Location: class_crud_new.php?table=$table");
 }
 ?>
 
@@ -41,14 +46,14 @@ if($_POST){
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            
+
             <!-- Navigation Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold text-dark">
                     <i class="fas fa-edit text-primary me-2"></i>Edit <?php echo strtoupper(str_replace('_', ' ', $table)); ?>
                 </h3>
                 <!-- Fixed Back Link to masters.php[cite: 4] -->
-                <a href="masters.php?table=<?php echo $table; ?>" class="btn btn-outline-secondary shadow-sm">
+                <a href="class_crud_new.php?table=<?php echo $table; ?>" class="btn btn-outline-secondary shadow-sm">
                     <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
                 </a>
             </div>
@@ -61,17 +66,22 @@ if($_POST){
                 <div class="card-body p-4">
                     <form method="POST">
                         <div class="row">
-                            <?php foreach($columns as $col): ?>
-                                <?php if($col != $pk): ?>
+                            <?php foreach ($columns as $col): ?>
+                                <?php if (
+                                    $col != $pk &&
+                                    $col != 'status' &&
+                                    $col != 'created_at' &&
+                                    $col != 'date'
+                                ): ?>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-bold text-muted small">
                                             <?php echo strtoupper(str_replace('_', ' ', $col)); ?>
                                         </label>
-                                        <input type="text" 
-                                               name="<?php echo $col; ?>" 
-                                               value="<?php echo $data[$col]; ?>" 
-                                               class="form-control form-control-lg shadow-sm border-2" 
-                                               required>
+                                        <input type="text"
+                                            name="<?php echo $col; ?>"
+                                            value="<?php echo $data[$col]; ?>"
+                                            class="form-control form-control-lg shadow-sm border-2"
+                                            required>
                                     </div>
                                 <?php endif; ?>
                             <?php endforeach; ?>
@@ -83,14 +93,12 @@ if($_POST){
                             <button type="submit" class="btn btn-primary btn-lg px-5 shadow">
                                 <i class="fas fa-save me-2"></i>Update Changes
                             </button>
-                            <a href="masters.php?table=<?php echo $table; ?>" class="btn btn-light btn-lg px-4 border">
-                                Cancel
-                            </a>
+                            <a href="class_crud_new.php?table=<?php echo $table; ?>" class="btn btn-link">Cancel</a>
                         </div>
                     </form>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </div>
