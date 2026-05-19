@@ -1,74 +1,70 @@
 <?php
 ob_start();
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 require "../database/db_connect.php";
 $db_handle = new DBController();
 
 $message = "";
 if (isset($_POST['register'])) {
 
-    $first_name = mysqli_real_escape_string($db_handle->conn, $_POST['first_name']);
-    $last_name = mysqli_real_escape_string($db_handle->conn, $_POST['last_name']);
-    $email = mysqli_real_escape_string($db_handle->conn, $_POST['email']);
-    $phone = mysqli_real_escape_string($db_handle->conn, $_POST['phone']);
-    $department = mysqli_real_escape_string($db_handle->conn, $_POST['department']);
-    $password = mysqli_real_escape_string($db_handle->conn, $_POST['password']);
-    $confirm_password = mysqli_real_escape_string($db_handle->conn, $_POST['confirm_password']);
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
 
-    $role_id = 5;
-    $student_id = 0;
+    
 
-    if ($password !== $confirm_password) {
-        $message = "Passwords do not match!";
-    } elseif (strpos($email, "@tcetmumbai.in") === false) {
-        $message = "Use institute email only!";
-    } else {
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $department = $_POST['department'];
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
-        $check = $db_handle->query("SELECT * FROM rt_user_master WHERE email_id='$email'");
+    
 
-        if ($check && mysqli_num_rows($check) > 0) {
-            $message = "Email already exists!";
+    if ($password != $confirm_password) {
+        die("Passwords do not match");
+    }
+
+    
+
+    $sql1 = "INSERT INTO rt_user_master
+    (first_name,last_name,email_id,password,phone_number,department_id,role_id,student_id,status)
+    VALUES
+    ('$first_name','$last_name','$email','$password','$phone','$department','5','0','1')";
+
+    if(mysqli_query($db_handle->conn, $sql1)){
+
+        
+
+        $user_id = mysqli_insert_id($db_handle->conn);
+
+        $sql2 = "INSERT INTO rt_login
+        (username,password,role_id,user_id)
+        VALUES
+        ('$email','$password','5','$user_id')";
+
+        if(mysqli_query($db_handle->conn, $sql2)){
+
+            
+
+            echo "<script>
+            alert('Registration Successful');
+            window.top.location.href='../login/index.php';
+            </script>";
+
+            exit();
+
         } else {
 
-//$hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            $sql1 = "INSERT INTO rt_user_master 
-            (first_name, last_name, email_id, phone_number, department_id, role_id, student_id)
-            VALUES 
-            ('$first_name','$last_name','$email','$phone','$department','$role_id','$student_id')";
-
-            if ($db_handle->query($sql1)) {
-
-                $user_id = mysqli_insert_id($db_handle->conn);
-
-                $sql2 = "INSERT INTO rt_login(username,password, role_id, user_id)
-                         VALUES('$email','$password','$role_id','$user_id')";
-
-                if ($db_handle->query($sql2)) {
-
-                    $_SESSION['user_id'] = $user_id;
-                    $_SESSION['role_id'] = $role_id;
-                    //header("Location: index.php");
-                    //exit();
-                    //echo "<script>
-                       //
-                       //window.top.location.replace('index.php');
-                   // </script>";
-                    //exit();
-                    
-                    echo "<script>
-                    alert('Registration Successful!');
-                    window.top.location.href='index.php';</script>";
-                    exit();
-
-                } else {
-                    $message = "Login Insert Error";
-                }
-
-            } else {
-                $message = "User Insert Error";
-            }
+            die("LOGIN ERROR: " . mysqli_error($db_handle->conn));
         }
+
+    } else {
+
+        die("USER ERROR: " . mysqli_error($db_handle->conn));
     }
 }
 ?>
@@ -202,7 +198,7 @@ if (isset($_POST['register'])) {
                 <h2>Registration Form</h2>
             </div>
             <div class="main-form">
-                <form id="register-form" method="post">
+                <form id="register-form" method="post" action="">
                     <div class="label1">
                         <label for="first_name">First Name</label>
                         <input type="text" placeholder="Enter your First Name" name="first_name" id="first_name" required /><br>

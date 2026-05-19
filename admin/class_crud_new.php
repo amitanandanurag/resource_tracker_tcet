@@ -1,31 +1,171 @@
-<?php ob_start(); include "header/header.php"; ?>
+<?php ob_start();
+include "header/header.php"; ?>
 <?php
 $masters = array(
+
   'class' => array(
     'title' => 'Class',
     'table' => 'rt_class_master',
-    'pk' => 'class_id',
-    'name' => 'class_name'
+    'pk'    => 'class_id',
+    'name'  => 'class_name'
   ),
-  'section' => array(
-    'title' => 'Section',
-    'table' => 'rt_section_master',
-    'pk' => 'id',
-    'name' => 'sections'
-  ),
+
   'department' => array(
     'title' => 'Department',
     'table' => 'rt_department_master',
-    'pk' => 'department_id',
-    'name' => 'department_name'
+    'pk'    => 'department_id',
+    'name'  => 'department_name'
   ),
+
+  'division' => array(
+    'title' => 'Division',
+    'table' => 'rt_division_master',
+    'pk'    => 'division_id',
+    'name'  => 'division_name'
+  ),
+
+  'role' => array(
+    'title' => 'Role',
+    'table' => 'rt_role_master',
+    'pk'    => 'role_id',
+    'name'  => 'role_name'
+  ),
+
   'menu' => array(
     'title' => 'Menu',
     'table' => 'rt_menu_master',
-    'pk' => 'menu_id',
-    'name' => 'menu_name'
+    'pk'    => 'menu_id',
+    'name'  => 'menu_name'
+  ),
+
+  'sub_menu' => array(
+    'title' => 'Sub Menu',
+    'table' => 'rt_sub_menu_master',
+    'pk'    => 'sub_menu_id',
+    'name'  => 'sub_menu_name'
+  ),
+
+  'user' => array(
+    'title' => 'Users',
+    'table' => 'rt_user_master',
+    'pk'    => 'user_id',
+    'name'  => 'first_name'
+  ),
+
+  'userlog' => array(
+    'title' => 'User Logs',
+    'table' => 'rt_user_log_master',
+    'pk'    => 'user_log_id',
+    'name'  => 'user_id'
+  ),
+
+  'menuallocation' => array(
+    'title' => 'Menu Allocation',
+    'table' => 'rt_menu_allocation_master',
+    'pk'    => 'menu_allocation_id',
+    'name'  => 'role_id'
   )
+
 );
+$type = $_GET['type'] ?? '';
+$tab  = $_GET['tab'] ?? '';
+
+if ($tab === 'sub-menu-list') {
+  $type = 'sub_menu';
+}
+
+if ($tab === 'menu-list') {
+  $type = 'menu';
+}
+
+if ($tab === 'class-list') {
+  $type = 'class';
+}
+
+if ($tab === 'division-list') {
+  $type = 'division';
+}
+
+if ($tab === 'department-list') {
+  $type = 'department';
+}
+
+if ($tab === 'role-list') {
+  $type = 'role';
+}
+
+if ($tab === 'user-list') {
+  $type = 'user';
+}
+
+if ($tab === 'userlog-list') {
+  $type = 'userlog';
+}
+
+if (!isset($masters[$type])) {
+  $type = 'class';
+}
+
+$activeMaster = $type;
+$masterRows = [];
+
+foreach ($masters as $key => $meta) {
+
+  $tableName = $meta['table'];
+  $pkCol     = $meta['pk'];
+  $nameCol   = $meta['name'];
+
+  $masterRows[$key] = [];
+
+  $extraCol = "";
+
+  if ($key == "menu") {
+    $extraCol = ", menu_icon";
+  }
+
+//   echo $key;
+
+//   echo "<pre>";
+
+// echo "KEY         : " . $key . "\n";
+// echo "TABLE       : " . $tableName . "\n";
+// echo "PK COLUMN   : " . $pkCol . "\n";
+// echo "NAME COLUMN : " . $nameCol . "\n";
+// echo "EXTRA COL   : " . ($extraCol == "" ? "NONE" : $extraCol) . "\n";
+
+// echo "SQL QUERY   : \n";
+// echo $sql . "\n";
+
+// echo "----------------------------------\n";
+
+// echo "</pre>";
+
+  $sql = "SELECT $pkCol AS master_id,
+                   $nameCol AS master_name
+            FROM $tableName
+            WHERE status = 1";
+
+  $result = mysqli_query($db_handle->conn, $sql);
+
+if (!$result) {
+
+    // echo "<pre>";
+    // echo $key . "\n";
+    // echo $sql . "\n";
+    // echo mysqli_error($db_handle->conn);
+    // echo "</pre>";
+
+    continue;
+}
+  if ($result) {
+
+    while ($row = mysqli_fetch_assoc($result)) {
+
+      $masterRows[$key][] = $row;
+    }
+  }
+}
+
 
 function clean_master_value($value)
 {
@@ -144,7 +284,7 @@ function get_default_submenu_route($subMenuName)
     'register mentor' => 'mentor_register.php',
     'mentor info' => 'mentor_info.php',
     'manage class' => 'class_crud_new.php',
-    'manage section' => 'class_crud_new.php#section-list'
+    'manage section' => 'class_crud_new.php#division-list'
   );
 
   return isset($map[$subMenuName]) ? $map[$subMenuName] : '#';
@@ -509,117 +649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['master_action'], $_PO
           $alertMessage = 'Unable to validate duplicate ' . strtolower($title) . ' before update.';
         }
       }
-    } elseif ($action === 'delete') {
-      $id = intval($_POST['master_id'] ?? 0);
-      $activeTab = $masterType . '-list';
-
-      if ($id <= 0) {
-        $alertType = 'warning';
-        $alertMessage = 'Invalid ' . strtolower($title) . ' selected for delete.';
-      } else {
-        if ($masterType === 'menu') {
-          mysqli_begin_transaction($db_handle->conn);
-
-          $ok = true;
-
-          $deleteAllocBySubSql = "DELETE ma
-                                 FROM rt_menu_allocation_master ma
-                                 INNER JOIN rt_sub_menu_master sm ON sm.sub_menu_id = ma.sub_menu_id
-                                 WHERE sm.menu_id = ?";
-          $deleteAllocBySubStmt = mysqli_prepare($db_handle->conn, $deleteAllocBySubSql);
-          if ($deleteAllocBySubStmt) {
-            mysqli_stmt_bind_param($deleteAllocBySubStmt, 'i', $id);
-            $ok = $ok && mysqli_stmt_execute($deleteAllocBySubStmt);
-            mysqli_stmt_close($deleteAllocBySubStmt);
-          } else {
-            $ok = false;
-          }
-
-          if ($ok) {
-            $deleteAllocSql = "DELETE FROM rt_menu_allocation_master WHERE menu_id = ?";
-            $deleteAllocStmt = mysqli_prepare($db_handle->conn, $deleteAllocSql);
-            if ($deleteAllocStmt) {
-              mysqli_stmt_bind_param($deleteAllocStmt, 'i', $id);
-              $ok = $ok && mysqli_stmt_execute($deleteAllocStmt);
-              mysqli_stmt_close($deleteAllocStmt);
-            } else {
-              $ok = false;
-            }
-          }
-
-          if ($ok) {
-            $deleteSubMenuSql = "DELETE FROM rt_sub_menu_master WHERE menu_id = ?";
-            $deleteSubMenuStmt = mysqli_prepare($db_handle->conn, $deleteSubMenuSql);
-            if ($deleteSubMenuStmt) {
-              mysqli_stmt_bind_param($deleteSubMenuStmt, 'i', $id);
-              $ok = $ok && mysqli_stmt_execute($deleteSubMenuStmt);
-              mysqli_stmt_close($deleteSubMenuStmt);
-            } else {
-              $ok = false;
-            }
-          }
-
-          if ($ok) {
-            $deleteMenuSql = "DELETE FROM rt_menu_master WHERE menu_id = ?";
-            $deleteMenuStmt = mysqli_prepare($db_handle->conn, $deleteMenuSql);
-            if ($deleteMenuStmt) {
-              mysqli_stmt_bind_param($deleteMenuStmt, 'i', $id);
-              $ok = $ok && mysqli_stmt_execute($deleteMenuStmt);
-              mysqli_stmt_close($deleteMenuStmt);
-            } else {
-              $ok = false;
-            }
-          }
-
-          if ($ok) {
-            mysqli_commit($db_handle->conn);
-            $alertType = 'success';
-            $alertMessage = $title . ' deleted successfully.';
-            $shouldSyncSidebar = true;
-            if ($isAjaxRequest) {
-              $ajaxResponse = array('status' => 'success', 'message' => $alertMessage, 'master_type' => $masterType, 'master_id' => $id);
-            }
-          } else {
-            mysqli_rollback($db_handle->conn);
-            $alertType = 'danger';
-            $alertMessage = 'Unable to delete ' . strtolower($title) . '. It may be in use.';
-            if ($isAjaxRequest) {
-              $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-            }
-          }
-        } else {
-          $deleteSql = "DELETE FROM $table WHERE $pk = ?";
-          $deleteStmt = mysqli_prepare($db_handle->conn, $deleteSql);
-
-          if ($deleteStmt) {
-            mysqli_stmt_bind_param($deleteStmt, 'i', $id);
-            $ok = mysqli_stmt_execute($deleteStmt);
-            mysqli_stmt_close($deleteStmt);
-
-            if ($ok) {
-              $alertType = 'success';
-              $alertMessage = $title . ' deleted successfully.';
-              $shouldSyncSidebar = true;
-              if ($isAjaxRequest) {
-                $ajaxResponse = array('status' => 'success', 'message' => $alertMessage, 'master_type' => $masterType, 'master_id' => $id);
-              }
-            } else {
-              $alertType = 'danger';
-              $alertMessage = 'Unable to delete ' . strtolower($title) . '. It may be in use.';
-              if ($isAjaxRequest) {
-                $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-              }
-            }
-          } else {
-            $alertType = 'danger';
-            $alertMessage = 'Unable to prepare delete statement for ' . strtolower($title) . '.';
-            if ($isAjaxRequest) {
-              $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-            }
-          }
-        }
-      }
-    }
+    } 
   }
 }
 
@@ -797,9 +827,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
     if ($subMenuId <= 0) {
       $alertType = 'warning';
       $alertMessage = 'Invalid sub menu selected for delete.';
-        if ($isAjaxRequest) {
-          $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-        }
+      if ($isAjaxRequest) {
+        $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
+      }
     } else {
       $allocDeleteSql = "DELETE FROM rt_menu_allocation_master WHERE sub_menu_id = ?";
       $allocDeleteStmt = mysqli_prepare($db_handle->conn, $allocDeleteSql);
@@ -821,22 +851,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sub_menu_action'])) {
           $alertType = 'success';
           $alertMessage = 'Sub menu deleted successfully.';
           $shouldSyncSidebar = true;
-            if ($isAjaxRequest) {
-              $ajaxResponse = array('status' => 'success', 'message' => $alertMessage, 'sub_menu_id' => $subMenuId);
-            }
+          if ($isAjaxRequest) {
+            $ajaxResponse = array('status' => 'success', 'message' => $alertMessage, 'sub_menu_id' => $subMenuId);
+          }
         } else {
           $alertType = 'danger';
           $alertMessage = 'Unable to delete sub menu.';
-            if ($isAjaxRequest) {
-              $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-            }
+          if ($isAjaxRequest) {
+            $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
+          }
         }
       } else {
         $alertType = 'danger';
         $alertMessage = 'Unable to prepare delete statement for sub menu.';
-          if ($isAjaxRequest) {
-            $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
-          }
+        if ($isAjaxRequest) {
+          $ajaxResponse = array('status' => 'error', 'message' => $alertMessage);
+        }
       }
     }
   }
@@ -860,25 +890,40 @@ if ($isAjaxRequest && $ajaxResponse !== null) {
 
 normalize_sub_menu_sequence_by_menu($db_handle->conn);
 
-$masterRows = array();
-foreach ($masters as $type => $meta) {
-  $table = $meta['table'];
-  $pk = $meta['pk'];
-  $nameCol = $meta['name'];
 
-  $rows = array();
-  if ($type === 'menu') {
-    $result = $db_handle->conn->query("SELECT $pk AS master_id, $nameCol AS master_name, COALESCE(NULLIF(TRIM(menu_icon), ''), 'fa fa-folder') AS menu_icon FROM $table ORDER BY $nameCol ASC");
-  } else {
-    $result = $db_handle->conn->query("SELECT $pk AS master_id, $nameCol AS master_name FROM $table ORDER BY $nameCol ASC");
-  }
-  if ($result) {
-    while ($row = $result->fetch_assoc()) {
-      $rows[] = $row;
-    }
-  }
-  $masterRows[$type] = $rows;
-}
+// foreach ($masters as $type => $meta) {
+//   $currentTable = $masters[$activeMaster]['table'];
+//   $currentPK = $masters[$activeMaster]['pk'];
+//   $currentName = $masters[$activeMaster]['name'];
+// // 1. Get table from URL, default to 'class' if empty
+// $table_from_url = $_GET['table'] ?? '';
+
+// // 2. Map the URL table name to your $masters array key
+// $activeMaster = 'class'; // Default
+// foreach ($masters as $key => $config) {
+//     if ($config['table'] === $table_from_url) {
+//         $activeMaster = $key;
+//         break;
+//     }
+// }
+
+// // 3. Define the variables for the query (Matches your array keys)
+// $pkCol    = $masters[$activeMaster]['pk'];    // class_id, department_id, etc.
+// $nameCol  = $masters[$activeMaster]['name'];  // class_name, etc.
+// $tableName = $masters[$activeMaster]['table']; // rt_class_master, etc.
+//   $rows = array();
+//   if ($key === 'menu') {
+//    $sql = "SELECT $pkCol AS master_id, $nameCol AS master_name FROM $tableName WHERE status = 1";
+//     $result = $db_handle->conn->query($sql);
+//    $result = $db_handle->conn->query("SELECT $currentPK AS id, $currentName AS name FROM $currentTable WHERE status = 1");
+//   }
+//   if ($result) {
+//     while ($row = $result->fetch_assoc()) {
+//       $rows[] = $row;
+//     }
+//   }
+//   $masterRows[$type] = $rows;
+// }
 
 $menuOptions = array();
 $menuResult = $db_handle->conn->query("SELECT menu_id, menu_name, COALESCE(NULLIF(TRIM(menu_icon), ''), 'fa fa-folder') AS menu_icon FROM rt_menu_master ORDER BY menu_name ASC");
@@ -918,185 +963,199 @@ if ($subMenuResult) {
 
       <div id="ajax-status-message" style="margin-top: 15px;"></div>
 
-      <ul class="nav nav-tabs" style="margin-top: 20px;">
-        <li class="<?php echo ($activeTab === 'class-list') ? 'active' : ''; ?>"><a data-toggle="tab" href="#class-list">Class</a></li>
+      <ul class="nav nav-tabs" style="margin-top:20px;">
 
-        <li class="<?php echo ($activeTab === 'section-list') ? 'active' : ''; ?>"><a data-toggle="tab" href="#section-list">Section</a></li>
+          <li class="<?php echo ($activeTab === 'class-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#class-list">Class</a>
+          </li>
 
-        <li class="<?php echo ($activeTab === 'department-list') ? 'active' : ''; ?>"><a data-toggle="tab" href="#department-list">Departments</a></li>
+          <li class="<?php echo ($activeTab === 'department-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#department-list">Department</a>
+          </li>
 
-      </ul>
+          <li class="<?php echo ($activeTab === 'division-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#division-list">Division</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'role-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#role-list">Role</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'menu-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#menu-list">Menu</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'sub_menu-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#sub_menu-list">Sub Menu</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'user-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#user-list">Users</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'userlog-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#userlog-list">User Logs</a>
+          </li>
+
+          <li class="<?php echo ($activeTab === 'menuallocation-list') ? 'active' : ''; ?>">
+              <a data-toggle="tab" href="#menuallocation-list">Menu Allocation</a>
+          </li>
+
+        </ul>
 
       <div class="tab-content" style="padding-top: 20px;">
-        <?php foreach ($masters as $type => $meta) {
-          $listTabId = $type . '-list';
-          $addTabId = $type . '-add';
-          $title = $meta['title'];
-          $rows = $masterRows[$type];
-        ?>
 
-          <div id="<?php echo $listTabId; ?>" class="tab-pane fade <?php echo ($activeTab === $listTabId) ? 'in active' : ''; ?>">
-            <div class="clearfix" style="margin-bottom: 15px;">
-              <button
-                type="button"
-                class="btn btn-success pull-right open-add-modal"
-                data-toggle="modal"
-                data-target="#addMasterModal"
-                data-master-type="<?php echo htmlspecialchars($type); ?>"
-                data-master-title="<?php echo htmlspecialchars($title); ?>"
-              >
-                <i class="fa fa-plus"></i>
-              </button>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped text-center">
-                <thead>
-                  <tr>
-                    <th style="width: 80px;">No.</th>
-                    <th><?php echo htmlspecialchars($title); ?> Name</th>
-                    <?php if ($type === 'menu') { ?>
-                    <th>Icon</th>
-                    <?php } ?>
-                    <th style="width: 100px;">Edit</th>
-                    <th style="width: 100px;">Delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                <?php if (empty($rows)) { ?>
-                  <tr>
-                    <td colspan="<?php echo ($type === 'menu') ? '5' : '4'; ?>">No <?php echo htmlspecialchars(strtolower($title)); ?> found.</td>
-                  </tr>
-                <?php } else {
-                  $serialNumber = 1;
-                  foreach ($rows as $row) {
-                    $id = intval($row['master_id']);
-                    $name = (string) $row['master_name'];
-                    $menuIconValue = ($type === 'menu') ? (string) ($row['menu_icon'] ?? 'fa fa-folder') : '';
-                ?>
-                  <tr>
-                    <td><?php echo $serialNumber; ?></td>
-                    <td><?php echo htmlspecialchars($name); ?></td>
-                    <?php if ($type === 'menu') { ?>
-                    <td><i class="<?php echo htmlspecialchars($menuIconValue); ?>" aria-hidden="true"></i></td>
-                    <?php } ?>
+<?php foreach ($masters as $key => $meta) {
+
+    $listTabId = $key . '-list';
+
+    $title = $meta['title'];
+
+    $rows = $masterRows[$key] ?? [];
+
+    $currentTable = $meta['table'];
+
+?>
+
+<div id="<?php echo $listTabId; ?>"
+     class="tab-pane fade <?php echo ($activeTab === $listTabId) ? 'in active' : ''; ?>">
+
+    <div class="clearfix" style="margin-bottom: 15px;">
+
+        <button
+            type="button"
+            class="btn btn-success pull-right open-add-modal"
+            data-toggle="modal"
+            data-target="#addMasterModal"
+            data-master-type="<?php echo htmlspecialchars($key); ?>"
+            data-master-title="<?php echo htmlspecialchars($title); ?>">
+
+            <i class="fa fa-plus"></i>
+
+        </button>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-striped text-center">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width:80px;">No.</th>
+
+                    <th><?php echo $title; ?> Name</th>
+
+                    <th style="width:100px;">Edit</th>
+
+                    <th style="width:100px;">Delete</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <?php
+
+            if (!empty($rows)) {
+
+                $i = 1;
+
+                foreach ($rows as $row) {
+
+            ?>
+
+                <tr>
+
+                    <td><?php echo $i++; ?></td>
+
                     <td>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-primary open-edit-modal"
-                        data-toggle="modal"
-                        data-target="#editMasterModal"
-                        data-master-type="<?php echo htmlspecialchars($type); ?>"
-                        data-master-id="<?php echo $id; ?>"
-                        data-master-name="<?php echo htmlspecialchars($name, ENT_QUOTES); ?>"
-                        data-menu-icon="<?php echo htmlspecialchars($menuIconValue, ENT_QUOTES); ?>"
-                        data-master-title="<?php echo htmlspecialchars($title, ENT_QUOTES); ?>"
-                      >
-                        <i class="fa fa-pencil"></i>
-                      </button>
+
+                        <?php
+
+                        if ($key == 'user') {
+
+                            echo htmlspecialchars($row['master_name']);
+
+                        }
+
+                        elseif ($key == 'userlog') {
+
+                            echo "User ID : " . htmlspecialchars($row['master_name']);
+
+                        }
+
+                        elseif ($key == 'menuallocation') {
+
+                            echo "Role ID : " . htmlspecialchars($row['master_name']);
+
+                        }
+
+                        else {
+
+                            echo htmlspecialchars($row['master_name']);
+
+                        }
+
+                        ?>
+
                     </td>
+
                     <td>
-                      <form method="POST" class="ajax-delete-form" style="display:inline;" onsubmit="return confirmMasterDelete(<?php echo json_encode($name); ?>);">
-                        <input type="hidden" name="master_action" value="delete">
-                        <input type="hidden" name="master_type" value="<?php echo htmlspecialchars($type, ENT_QUOTES); ?>">
-                        <input type="hidden" name="master_id" value="<?php echo $id; ?>">
-                        <button type="submit" class="btn btn-sm btn-danger">
-                          <i class="fa fa-trash"></i>
-                        </button>
-                      </form>
+
+                        <a href="edit_master.php?table=<?php echo $currentTable; ?>&id=<?php echo $row['master_id']; ?>"
+                           class="btn btn-sm btn-primary">
+
+                            <i class="fa fa-pencil"></i>
+
+                        </a>
+
                     </td>
-                  </tr>
-                <?php
-                    $serialNumber++;
-                  }
+
+                    <td>
+
+                        <a href="delete_master.php?table=<?php echo $currentTable; ?>&id=<?php echo $row['master_id']; ?>"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Delete this record?')">
+
+                            <i class="fa fa-trash"></i>
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            <?php
+
                 }
-                ?>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-        <?php } ?>
+            } else {
 
-        <div id="sub-menu-list" class="tab-pane fade <?php echo ($activeTab === 'sub-menu-list') ? 'in active' : ''; ?>">
-          <div class="clearfix" style="margin-bottom: 15px;">
-            <button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#addSubMenuModal">
-              <i class="fa fa-plus"></i>
-            </button>
-          </div>
+            ?>
 
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped text-center">
-              <thead>
                 <tr>
-                  <th style="width: 80px;">No.</th>
-                  <th>Menu Name</th>
-                  <th style="width: 100px;">Sequence</th>
-                  <th>Sub Menu Name</th>
-                  <th>Route</th>
-                  <th>Icon</th>
-                  <th style="width: 100px;">Edit</th>
-                  <th style="width: 100px;">Delete</th>
+
+                    <td colspan="4">No Data Found</td>
+
                 </tr>
-              </thead>
-              <tbody>
-              <?php if (empty($subMenuRows)) { ?>
-                <tr>
-                  <td colspan="8">No sub menu found.</td>
-                </tr>
-              <?php } else {
-                $subSerial = 1;
-                foreach ($subMenuRows as $subRow) {
-                  $subId = intval($subRow['sub_menu_id']);
-                  $subMenuIdValue = intval($subRow['menu_id']);
-                  $sortOrderValue = intval($subRow['sort_order']);
-                  $menuNameValue = (string) $subRow['menu_name'];
-                  $subNameValue = (string) $subRow['sub_menu_name'];
-                  $subIconValue = (string) $subRow['sub_menu_icon'];
-                  $subRouteValue = (string) $subRow['sub_menu_route'];
-              ?>
-                <tr>
-                  <td><?php echo $subSerial; ?></td>
-                  <td><?php echo htmlspecialchars($menuNameValue); ?></td>
-                  <td><?php echo $sortOrderValue; ?></td>
-                  <td><?php echo htmlspecialchars($subNameValue); ?></td>
-                  <td><?php echo htmlspecialchars($subRouteValue); ?></td>
-                  <td><i class="<?php echo htmlspecialchars($subIconValue); ?>" aria-hidden="true"></i></td>
-                  <td>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-primary open-submenu-edit-modal"
-                      data-toggle="modal"
-                      data-target="#editSubMenuModal"
-                      data-sub-menu-id="<?php echo $subId; ?>"
-                      data-menu-id="<?php echo $subMenuIdValue; ?>"
-                      data-sub-menu-name="<?php echo htmlspecialchars($subNameValue, ENT_QUOTES); ?>"
-                      data-sub-menu-route="<?php echo htmlspecialchars($subRouteValue, ENT_QUOTES); ?>"
-                      data-sub-menu-icon="<?php echo htmlspecialchars($subIconValue, ENT_QUOTES); ?>"
-                      data-sort-order="<?php echo $sortOrderValue; ?>"
-                    >
-                      <i class="fa fa-pencil"></i>
-                    </button>
-                  </td>
-                  <td>
-                    <form method="POST" class="ajax-delete-form" style="display:inline;" onsubmit="return confirmSubMenuDelete(<?php echo json_encode($subNameValue); ?>);">
-                      <input type="hidden" name="sub_menu_action" value="delete">
-                      <input type="hidden" name="sub_menu_id" value="<?php echo $subId; ?>">
-                      <button type="submit" class="btn btn-sm btn-danger">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              <?php
-                  $subSerial++;
-                }
-              }
-              ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+
+            <?php } ?>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<?php } ?>
+
+</div>
     </div>
   </section>
 </div>
@@ -1413,7 +1472,7 @@ if ($subMenuResult) {
         data: data,
         dataType: 'json',
         success: function(response) {
-            if (response && response.status === 'success') {
+          if (response && response.status === 'success') {
             $('#addMasterModal').modal('hide');
             $('#addSubMenuModal').modal('hide');
 
@@ -1423,7 +1482,7 @@ if ($subMenuResult) {
               var masterType = form.find('input[name="master_type"]').val();
               var masterName = form.find('input[name="master_name"]').val();
               var targetTable = $('#' + masterType + '-list tbody');
-                var rowCount = targetTable.find('tr').length + 1;
+              var rowCount = targetTable.find('tr').length + 1;
               var noRows = targetTable.find('tr td[colspan]').first();
 
               if (noRows.length) {
@@ -1433,13 +1492,13 @@ if ($subMenuResult) {
               var newRow = '';
               if (masterType === 'menu') {
                 var menuIcon = response.menu_icon || 'fa fa-folder';
-                  var safeMenuName = $('<div/>').text(masterName).html();
+                var safeMenuName = $('<div/>').text(masterName).html();
                 newRow = '<tr>' +
                   '<td>' + rowCount + '</td>' +
                   '<td>' + safeMenuName + '</td>' +
                   '<td><i class="' + menuIcon + '" aria-hidden="true"></i></td>' +
                   '<td><button type="button" class="btn btn-sm btn-primary open-edit-modal" data-toggle="modal" data-target="#editMasterModal" data-master-type="menu" data-master-id="' + response.master_id + '" data-master-name="' + safeMenuName + '" data-menu-icon="' + menuIcon + '" data-master-title="Menu"><i class="fa fa-pencil"></i></button></td>' +
-                  '<td><form method="POST" class="ajax-delete-form" style="display:inline;" onsubmit="return confirmMasterDelete(' + JSON.stringify(masterName) + ');"><input type="hidden" name="master_action" value="delete"><input type="hidden" name="master_type" value="menu"><input type="hidden" name="master_id" value="' + response.master_id + '"><button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></form></td>' +
+                  
                   '</tr>';
 
                 targetTable.append(newRow);
@@ -1475,14 +1534,14 @@ if ($subMenuResult) {
               var safeSubMenuName = $('<div/>').text(subMenuName).html();
               targetTable.append(
                 '<tr>' +
-                  '<td>' + rowCount + '</td>' +
-                  '<td>' + safeMenuName + '</td>' +
-                  '<td>' + $('<div/>').text(String(sortOrder)).html() + '</td>' +
-                  '<td>' + safeSubMenuName + '</td>' +
-                  '<td>' + $('<div/>').text(subMenuRoute).html() + '</td>' +
-                  '<td><i class="' + subMenuIcon + '" aria-hidden="true"></i></td>' +
-                  '<td><button type="button" class="btn btn-sm btn-primary open-submenu-edit-modal" data-toggle="modal" data-target="#editSubMenuModal" data-sub-menu-id="' + response.sub_menu_id + '" data-menu-id="' + menuId + '" data-sub-menu-name="' + $('<div/>').text(subMenuName).html() + '" data-sub-menu-route="' + $('<div/>').text(subMenuRoute).html() + '" data-sub-menu-icon="' + $('<div/>').text(subMenuIcon).html() + '" data-sort-order="' + sortOrder + '"><i class="fa fa-pencil"></i></button></td>' +
-                  '<td><form method="POST" class="ajax-delete-form" style="display:inline;" onsubmit="return confirmSubMenuDelete(' + JSON.stringify(subMenuName) + ');"><input type="hidden" name="sub_menu_action" value="delete"><input type="hidden" name="sub_menu_id" value="' + response.sub_menu_id + '"><button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></form></td>' +
+                '<td>' + rowCount + '</td>' +
+                '<td>' + safeMenuName + '</td>' +
+                '<td>' + $('<div/>').text(String(sortOrder)).html() + '</td>' +
+                '<td>' + safeSubMenuName + '</td>' +
+                '<td>' + $('<div/>').text(subMenuRoute).html() + '</td>' +
+                '<td><i class="' + subMenuIcon + '" aria-hidden="true"></i></td>' +
+                '<td><button type="button" class="btn btn-sm btn-primary open-submenu-edit-modal" data-toggle="modal" data-target="#editSubMenuModal" data-sub-menu-id="' + response.sub_menu_id + '" data-menu-id="' + menuId + '" data-sub-menu-name="' + $('<div/>').text(subMenuName).html() + '" data-sub-menu-route="' + $('<div/>').text(subMenuRoute).html() + '" data-sub-menu-icon="' + $('<div/>').text(subMenuIcon).html() + '" data-sort-order="' + sortOrder + '"><i class="fa fa-pencil"></i></button></td>' +
+                '<td><form method="POST" class="ajax-delete-form" style="display:inline;" onsubmit="return confirmSubMenuDelete(' + JSON.stringify(subMenuName) + ');"><input type="hidden" name="sub_menu_action" value="delete"><input type="hidden" name="sub_menu_id" value="' + response.sub_menu_id + '"><button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></form></td>' +
                 '</tr>'
               );
 
@@ -1501,64 +1560,7 @@ if ($subMenuResult) {
       });
     });
 
-    $(document).on('submit', '.ajax-delete-form', function(event) {
-      event.preventDefault();
-
-      var form = $(this);
-      var row = form.closest('tr');
-      var table = row.closest('table');
-      var columnCount = table.find('thead th').length;
-      var button = form.find('button[type="submit"]');
-      var originalHtml = button.html();
-
-      button.prop('disabled', true);
-
-      $.ajax({
-        type: 'POST',
-        url: 'class_crud_new.php?tab=<?php echo urlencode($activeTab); ?>',
-        data: form.serialize(),
-        dataType: 'json',
-        success: function(response) {
-          if (response && response.status === 'success') {
-            row.fadeOut(200, function() {
-              $(this).remove();
-            });
-
-            var tableBody = row.closest('tbody');
-            if (tableBody.find('tr').length === 1) {
-              tableBody.append('<tr><td colspan="' + columnCount + '">No records found.</td></tr>');
-            }
-
-            if (response.master_type === 'menu' && response.master_id) {
-              $('#sidebar-menu-' + response.master_id).remove();
-
-              // Remove deleted menu from submenu menu dropdowns immediately.
-              $('#add_sub_menu_parent option[value="' + response.master_id + '"]').remove();
-              $('#edit_sub_menu_parent option[value="' + response.master_id + '"]').remove();
-            }
-            if (response.sub_menu_id) {
-              var sidebarSub = $('#sidebar-submenu-item-' + response.sub_menu_id);
-              var sidebarList = sidebarSub.closest('ul.treeview-menu');
-              sidebarSub.remove();
-
-              if (sidebarList.length && sidebarList.find('li').length === 0) {
-                // keep empty menu container to allow future add without refresh
-              }
-            }
-
-            $('#ajax-status-message').html('<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + response.message + '</div>');
-          } else {
-            alert((response && response.message) ? response.message : 'Unable to delete record.');
-          }
-        },
-        error: function() {
-          alert('Unable to delete record.');
-        },
-        complete: function() {
-          button.prop('disabled', false).html(originalHtml);
-        }
-      });
-    });
+    
 
     <?php if ($openAddModalType !== '') { ?>
       $('#add_master_type').val('<?php echo htmlspecialchars($openAddModalType, ENT_QUOTES); ?>');
