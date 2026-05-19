@@ -296,7 +296,7 @@ while ($row = $result->fetch_assoc()) {
                   </p>
                   <span class="label label-default"
                     style="background: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">
-                    Role: Super Admin
+                    Role: <?php echo $role_name; ?>
                   </span>
                 </li>
 
