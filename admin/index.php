@@ -1,18 +1,19 @@
 <style>
     /* Force the calendar to be visible and white */
-#calendar {
-    background-color: white !important;
-    color: black !important;
-    min-height: 500px; /* Ensure it has space to grow */
-    padding: 15px;
-}
+    #calendar {
+        background-color: white !important;
+        color: black !important;
+        min-height: 500px;
+        /* Ensure it has space to grow */
+        padding: 15px;
+    }
 
-/* Fix the chart container to prevent squashing */
-.chart-container {
-    position: relative;
-    height: 350px;
-    width: 100%;
-}
+    /* Fix the chart container to prevent squashing */
+    .chart-container {
+        position: relative;
+        height: 350px;
+        width: 100%;
+    }
 </style>
 <?php
 require "header/header.php";
@@ -59,12 +60,12 @@ $util_data = mysqli_fetch_assoc(mysqli_query($db, $util_query));
 // ==========================================================
 // DEPARTMENT WISE USAGE (BAR GRAPH DATA)
 // ==========================================================
-    $dept_usage_query = "SELECT d.department_name, COUNT(b.booking_id) as usage_count FROM rt_department_master d LEFT JOIN rt_bookings b ON d.department_id = b.department_id GROUP BY d.department_id";
+$dept_usage_query = "SELECT d.department_name, COUNT(b.booking_id) as usage_count FROM rt_department_master d LEFT JOIN rt_bookings b ON d.department_id = b.department_id GROUP BY d.department_id";
 $dept_usage_result = mysqli_query($db, $dept_usage_query);
 
 $dept_names = [];
 $usage_counts = [];
-while($row = mysqli_fetch_assoc($dept_usage_result)) {
+while ($row = mysqli_fetch_assoc($dept_usage_result)) {
     $dept_names[] = $row['department_name'];
     $usage_counts[] = $row['usage_count'];
 }
@@ -74,9 +75,9 @@ while($row = mysqli_fetch_assoc($dept_usage_result)) {
 $heatmap_query = "SELECT HOUR(s.start_time) as booking_hour, COUNT(b.booking_id) as count FROM rt_bookings b JOIN rt_time_slots s ON b.slot_id = s.slot_id GROUP BY HOUR(s.start_time) ORDER BY booking_hour ASC;";
 $heatmap_result = mysqli_query($db, $heatmap_query);
 
-$hours_data = array_fill(0, 24, 0); 
-while($row = mysqli_fetch_assoc($heatmap_result)) {
-    $hours_data[(int)$row['booking_hour']] = (int)$row['count'];
+$hours_data = array_fill(0, 24, 0);
+while ($row = mysqli_fetch_assoc($heatmap_result)) {
+    $hours_data[(int) $row['booking_hour']] = (int) $row['count'];
 }
 
 // 2. CALENDAR DATA: Join with rt_resources to get names for the display
@@ -93,7 +94,7 @@ $events = [];
 //     ];
 // }
 
-while($row = mysqli_fetch_assoc($events_result)) {
+while ($row = mysqli_fetch_assoc($events_result)) {
     $events[] = [
         'title' => $row['resource_name'],
         'start' => $row['booking_date'],
@@ -118,31 +119,65 @@ while($row = mysqli_fetch_assoc($events_result)) {
     </section>
 
     <section class="content">
-<div class="dashboard-container">
-    <?php
-    $stats = [
-    ['label' => 'Total Resources', 'value' => $total_resources, 'icon' => 'fa-cubes', 'theme' => 'theme-1'],
-    ['label' => 'Total Users', 'value' => $total_users, 'icon' => 'fa-users', 'theme' => 'theme-2'],
-    ['label' => 'Active Bookings', 'value' => $active_bookings, 'icon' => 'fa-calendar-check-o', 'theme' => 'theme-4'],
-    ['label' => 'Departments', 'value' => $total_departments, 'icon' => 'fa-building', 'theme' => 'theme-5'],
-    ['label' => 'Pending Action', 'value' => $pending_approvals, 'icon' => 'fa-bell', 'theme' => 'theme-3']
-];
+        <div class="dashboard-container">
+            <?php
+            $stats = [
+                [
+                    'label' => 'Total Resources',
+                    'value' => $total_resources,
+                    'icon' => 'fa-cubes',
+                    'theme' => 'theme-1',
+                    'link' => 'resource_list.php'          // Change as required
+                ],
+                [
+                    'label' => 'Total Users',
+                    'value' => $total_users,
+                    'icon' => 'fa-users',
+                    'theme' => 'theme-2',
+                    'link' => 'class_crud_new.php?tab=user-list'
+                ],
+                [
+                    'label' => 'Active Bookings',
+                    'value' => $active_bookings,
+                    'icon' => 'fa-calendar-check-o',
+                    'theme' => 'theme-4',
+                    'link' => 'active_bookings.php'
+                ],
+                [
+                    'label' => 'Departments',
+                    'value' => $total_departments,
+                    'icon' => 'fa-building',
+                    'theme' => 'theme-5',
+                    'link' => 'class_crud_new.php?tab=department-list'
+                ],
+                [
+                    'label' => 'Pending Action',
+                    'value' => $pending_approvals,
+                    'icon' => 'fa-bell',
+                    'theme' => 'theme-3',
+                    'link' => 'pending_bookings.php'
+                ]
+            ];
 
-    foreach ($stats as $stat) {
-    ?>
-    <div class="glass-card <?php echo $stat['theme']; ?>">
-        <div class="glass-icon">
-            <i class="fa <?php echo $stat['icon']; ?>"></i>
-        </div>
-        <div class="glass-content">
-            <span class="glass-label"><?php echo $stat['label']; ?></span>
-            <h3 class="glass-number"><?php echo $stat['value']; ?></h3>
-        </div>
-    </div>
-    <?php } ?>
-</div>
+            foreach ($stats as $stat) {
+                ?>
+                <div class="glass-card <?php echo $stat['theme']; ?>"
+                    onclick="window.location.href='<?php echo $stat['link']; ?>';" style="cursor:pointer;">
 
-<div class="row">
+                    <div class="glass-icon">
+                        <i class="fa <?php echo $stat['icon']; ?>"></i>
+                    </div>
+
+                    <div class="glass-content">
+                        <span class="glass-label"><?php echo $stat['label']; ?></span>
+                        <h3 class="glass-number"><?php echo $stat['value']; ?></h3>
+                    </div>
+
+                </div>
+            <?php } ?>
+        </div>
+
+        <div class="row">
             <!-- Resource Utilization Pie Chart -->
             <div class="col-md-6">
                 <div class="box box-danger">
@@ -150,7 +185,7 @@ while($row = mysqli_fetch_assoc($events_result)) {
                         <h3 class="box-title">Resource Utilization (Today)</h3>
                     </div>
                     <div class="box-body" style="height:310px; justify-content:center; display:flex">
-                        <canvas id="utilPieChart" ></canvas>
+                        <canvas id="utilPieChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -166,9 +201,9 @@ while($row = mysqli_fetch_assoc($events_result)) {
                     </div>
                 </div>
             </div>
-        
 
-      
+
+
 
             <!-- Calendar View -->
             <div class="col-md-6">
@@ -183,7 +218,7 @@ while($row = mysqli_fetch_assoc($events_result)) {
                 </div>
             </div>
 
-              <!-- Peak Hours Heatmap -->
+            <!-- Peak Hours Heatmap -->
             <div class="col-md-6">
                 <div class="box box-info">
                     <div class="box-header with-border">
@@ -191,17 +226,18 @@ while($row = mysqli_fetch_assoc($events_result)) {
                     </div>
                     <div class="box-body">
                         <div class="chart">
-                            <canvas id="peakHoursChart" style="height: 200px; display: block; box-sizing: border-box; width: 600px"></canvas>
+                            <canvas id="peakHoursChart"
+                                style="height: 200px; display: block; box-sizing: border-box; width: 600px"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-</div>
-        </section>
+        </div>
+    </section>
 </div>
 
 <div class="row">
-    
+
 </div>
 
 <!-- Modal for Booking Details -->
@@ -233,7 +269,7 @@ while($row = mysqli_fetch_assoc($events_result)) {
                 backgroundColor: ['#f56954', '#00a65a']
             }]
         }
-    
+
     });
 
     // 2. Department Bar Chart
@@ -253,116 +289,117 @@ while($row = mysqli_fetch_assoc($events_result)) {
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    // 1. Heatmap (Bar Chart Proxy)
-    const ctx = document.getElementById('peakHoursChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode(array_map(function($h) { return $h.":00"; }, range(0, 23))); ?>,
-            datasets: [{
-                label: 'Number of Bookings',
-                data: <?php echo json_encode(array_values($hours_data)); ?>,
-                backgroundColor: 'rgba(0, 192, 239, 0.6)',
-                borderColor: '#00c0ef',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Heatmap (Bar Chart Proxy)
+        const ctx = document.getElementById('peakHoursChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode(array_map(function ($h) {
+                    return $h . ":00"; }, range(0, 23))); ?>,
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: <?php echo json_encode(array_values($hours_data)); ?>,
+                    backgroundColor: 'rgba(0, 192, 239, 0.6)',
+                    borderColor: '#00c0ef',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
 
-    // 2. Interactive Calendar
-    // const calendarEl = document.getElementById('calendar');
-    // const calendar = new FullCalendar.Calendar(calendarEl, {
-    //     initialView: 'dayGridMonth',
-    //     height: 450,
-    //     events: <?php echo json_encode($events); ?>,
-    //     dateClick: function(info) {
-    //         // Get all events for the clicked date
-    //         const selectedDate = info.dateStr;
-    //         const dailyEvents = calendar.getEvents().filter(e => {
-    //             // Ensure date format matches for comparison
-    //             const eventDate = e.start.toISOString().split('T')[0];
-    //             return eventDate === selectedDate;
-    //         });
+        // 2. Interactive Calendar
+        // const calendarEl = document.getElementById('calendar');
+        // const calendar = new FullCalendar.Calendar(calendarEl, {
+        //     initialView: 'dayGridMonth',
+        //     height: 450,
+        //     events: <?php echo json_encode($events); ?>,
+        //     dateClick: function(info) {
+        //         // Get all events for the clicked date
+        //         const selectedDate = info.dateStr;
+        //         const dailyEvents = calendar.getEvents().filter(e => {
+        //             // Ensure date format matches for comparison
+        //             const eventDate = e.start.toISOString().split('T')[0];
+        //             return eventDate === selectedDate;
+        //         });
 
-    //         // Populate Modal
-    //         document.getElementById('modalDate').innerText = selectedDate;
-    //         let listHtml = dailyEvents.length > 0 
-    //             ? "<ul class='list-group'>" + dailyEvents.map(e => 
-    //                 `<li class='list-group-item'><span class='badge' style='background-color:${e.backgroundColor}'>${e.title}</span></li>`
-    //               ).join('') + "</ul>"
-    //             : "<p class='text-center text-muted'>No bookings scheduled for this day.</p>";
-            
-    //         document.getElementById('modalContent').innerHTML = listHtml;
-    //         $('#bookingModal').modal('show');
-    //     }
-    // });
-    // calendar.render();
+        //         // Populate Modal
+        //         document.getElementById('modalDate').innerText = selectedDate;
+        //         let listHtml = dailyEvents.length > 0 
+        //             ? "<ul class='list-group'>" + dailyEvents.map(e => 
+        //                 `<li class='list-group-item'><span class='badge' style='background-color:${e.backgroundColor}'>${e.title}</span></li>`
+        //               ).join('') + "</ul>"
+        //             : "<p class='text-center text-muted'>No bookings scheduled for this day.</p>";
 
-    var calendarEl = document.getElementById('calendar');
-    
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        height: 450,
-        // Ensure events are passed as a clean JSON array
-        events: <?php echo json_encode($events); ?>,
-        
-        dateClick: function(info) {
-    const clickedDate = info.dateStr; // "2026-05-04"
-    const allEvents = calendar.getEvents();
+        //         document.getElementById('modalContent').innerHTML = listHtml;
+        //         $('#bookingModal').modal('show');
+        //     }
+        // });
+        // calendar.render();
 
-    const dailyEvents = allEvents.filter(event => {
-        // Use the local date parts to avoid the UTC/ISO shift
-        const d = event.start;
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        
-        const eventDate = `${year}-${month}-${day}`;
-        
-        console.log("Comparing:", eventDate, "to", clickedDate);
-        return eventDate === clickedDate;
-    });
+        var calendarEl = document.getElementById('calendar');
 
-    document.getElementById('modalDate').innerText = clickedDate;
-    let listHtml = "";
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 450,
+            // Ensure events are passed as a clean JSON array
+            events: <?php echo json_encode($events); ?>,
 
-    if (dailyEvents.length > 0) {
-        listHtml = '<div class="box-body no-padding"><table class="table table-condensed">';
-        listHtml += '<thead><tr><th>Resource Name</th><th style="width: 40px">Status</th></tr></thead><tbody>';
-        
-        dailyEvents.forEach(e => {
-            const status = e.extendedProps.status || 'Pending';
-            const labelColor = (status.toLowerCase() === 'approved') ? 'label-success' : 'label-warning';
-            
-            listHtml += `
+            dateClick: function (info) {
+                const clickedDate = info.dateStr; // "2026-05-04"
+                const allEvents = calendar.getEvents();
+
+                const dailyEvents = allEvents.filter(event => {
+                    // Use the local date parts to avoid the UTC/ISO shift
+                    const d = event.start;
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+
+                    const eventDate = `${year}-${month}-${day}`;
+
+                    console.log("Comparing:", eventDate, "to", clickedDate);
+                    return eventDate === clickedDate;
+                });
+
+                document.getElementById('modalDate').innerText = clickedDate;
+                let listHtml = "";
+
+                if (dailyEvents.length > 0) {
+                    listHtml = '<div class="box-body no-padding"><table class="table table-condensed">';
+                    listHtml += '<thead><tr><th>Resource Name</th><th style="width: 40px">Status</th></tr></thead><tbody>';
+
+                    dailyEvents.forEach(e => {
+                        const status = e.extendedProps.status || 'Pending';
+                        const labelColor = (status.toLowerCase() === 'approved') ? 'label-success' : 'label-warning';
+
+                        listHtml += `
                 <tr>
                     <td><b>${e.title}</b></td>
                     <td><span class="label ${labelColor}">${status}</span></td>
                 </tr>`;
-        });
-        
-        listHtml += '</tbody></table></div>';
-    } else {
-        listHtml = `
+                    });
+
+                    listHtml += '</tbody></table></div>';
+                } else {
+                    listHtml = `
             <div class="text-center" style="padding: 20px;">
                 <i class="fa fa-calendar-times-o fa-3x text-muted"></i>
                 <p>No bookings found for ${clickedDate}.</p>
             </div>`;
-    }
+                }
 
-    document.getElementById('modalContent').innerHTML = listHtml;
-    $('#bookingModal').modal('show');
-}
+                document.getElementById('modalContent').innerHTML = listHtml;
+                $('#bookingModal').modal('show');
+            }
+        });
+
+        calendar.render();
     });
-    
-    calendar.render();
-});
 </script>
 
 <?php include "header/footer.php"; ?>
