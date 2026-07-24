@@ -23,19 +23,19 @@ $userid = $row['user_id'];
 $usertype = $row['role_id'];
 $name = $row['username'];
 
-$full_email = $name;
+$full_email = $username;
 
-/* Extract name before @ */
-$user_name = strstr($full_email, '@', true);
-
-/* Convert dots/underscores to spaces */
-$display_name = ucwords(
-  str_replace(
-    ['.', '_'],
-    ' ',
-    $user_name
-  )
-);
+if (strpos($full_email, '@') !== false) {
+    $display_name = ucwords(
+        str_replace(
+            ['.', '_'],
+            ' ',
+            strstr($full_email, '@', true)
+        )
+    );
+} else {
+    $display_name = $full_email;
+}
 
 $sql = "SELECT * FROM rt_role_master WHERE role_id='" . $usertype . "'";
 $result = mysqli_query($db_handle->conn, $sql) or die("database error:" . mysqli_error($db_handle->conn));
@@ -290,9 +290,9 @@ while ($row = $result->fetch_assoc()) {
                     style="border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                   <p style="margin-top: 15px; font-weight: 600; font-size: 18px;">
                     <?php echo $display_name; ?>
-                    <small style="display: block; opacity: 0.8; font-weight: 400; font-size: 12px; margin-top: 5px;">
+                    <!--<small style="display: block; opacity: 0.8; font-weight: 400; font-size: 12px; margin-top: 5px;">
                       <?php echo $full_email; ?>
-                    </small>
+                    </small>-->
                   </p>
                   <span class="label label-default"
                     style="background: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">
