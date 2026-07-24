@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
         mysqli_stmt_close($profileCheckStmt);
 
         if ($profileExists) {
-          $profileUpdateSql = "UPDATE rt_user_master SET user_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
+          $profileUpdateSql = "UPDATE rt_user_master SET first_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
           $profileUpdateStmt = mysqli_prepare($db_handle->conn, $profileUpdateSql);
           if ($profileUpdateStmt) {
             mysqli_stmt_bind_param($profileUpdateStmt, 'sssii', $profileName, $profileEmail, $profilePhone, $currentUserId, $currentRoleId);
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
             $ok = false;
           }
         } else {
-          $profileInsertSql = "INSERT INTO rt_user_master (user_id, user_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, 0, ?, 0)";
+          $profileInsertSql = "INSERT INTO rt_user_master (user_id, first_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, 0, ?, 0)";
           $profileInsertStmt = mysqli_prepare($db_handle->conn, $profileInsertSql);
           if ($profileInsertStmt) {
             mysqli_stmt_bind_param($profileInsertStmt, 'isssi', $currentUserId, $profileName, $profileEmail, $profilePhone, $currentRoleId);
@@ -99,7 +99,7 @@ $profileData = array(
 );
 
 if ($currentUserId > 0 && $currentRoleId > 0) {
-  $profileSql = "SELECT l.username, r.role_name, u.first_name, u.email_id, u.phone_number, d.department_name FROM rt_login l LEFT JOIN rt_role_master r ON r.role_id = l.role_id LEFT JOIN rt_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id LEFT JOIN rt_department_master d ON d.department_id = u.department_id WHERE l.user_id = ? AND l.role_id = ? LIMIT 1;";
+  $profileSql = "SELECT l.username, u.first_name, u.last_name, r.role_name, u.first_name, u.email_id, u.phone_number, d.department_name FROM rt_login l LEFT JOIN rt_role_master r ON r.role_id = l.role_id LEFT JOIN rt_user_master u ON u.user_id = l.user_id AND u.role_id = l.role_id LEFT JOIN rt_department_master d ON d.department_id = u.department_id WHERE l.user_id = ? AND l.role_id = ? LIMIT 1;";
   $profileStmt = mysqli_prepare($db_handle->conn, $profileSql);
 
   if ($profileStmt) {
@@ -107,7 +107,7 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
     mysqli_stmt_execute($profileStmt);
     $profileResult = mysqli_stmt_get_result($profileStmt);
     if ($profileResult && ($row = mysqli_fetch_assoc($profileResult))) {
-      $displayName = trim((string) ($row['user_name'] ?? ''));
+      $displayName = trim((string) ($row['first_name'] ?? ''));
       if ($displayName === '') {
         $displayName = (string) ($row['username'] ?? '');
       }

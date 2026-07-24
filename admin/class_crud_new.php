@@ -59,12 +59,12 @@ $masters = array(
     'name'  => 'user_id'
   ),
 
-  'menuallocation' => array(
-    'title' => 'Menu Allocation',
-    'table' => 'rt_menu_allocation_master',
-    'pk'    => 'menu_allocation_id',
-    'name'  => 'role_id'
-  )
+  //'menuallocation' => array(
+  //  'title' => 'Menu Allocation',
+  //  'table' => 'rt_menu_allocation_master',
+   // 'pk'    => 'menu_allocation_id',
+  //  'name'  => 'role_id'
+  //)
 
 );
 $type = $_GET['type'] ?? '';
@@ -997,9 +997,9 @@ if ($subMenuResult) {
               <a data-toggle="tab" href="#userlog-list">User Logs</a>
           </li>
 
-          <li class="<?php echo ($activeTab === 'menuallocation-list') ? 'active' : ''; ?>">
+         <!-- <li class="<?php echo ($activeTab === 'menuallocation-list') ? 'active' : ''; ?>">
               <a data-toggle="tab" href="#menuallocation-list">Menu Allocation</a>
-          </li>
+          </li>-->
 
         </ul>
 
