@@ -1022,7 +1022,7 @@ if ($subMenuResult) {
 
     <div class="clearfix" style="margin-bottom: 15px;">
 
-        <button
+        <!--<button
             type="button"
             class="btn btn-success pull-right open-add-modal"
             data-toggle="modal"
@@ -1032,7 +1032,30 @@ if ($subMenuResult) {
 
             <i class="fa fa-plus"></i>
 
-        </button>
+        </button>-->
+        <?php if($key == "sub_menu"){ ?>
+
+            <button
+                type="button"
+                class="btn btn-success pull-right"
+                data-toggle="modal"
+                data-target="#addSubMenuModal">
+                <i class="fa fa-plus"></i>
+            </button>
+
+            <?php } else { ?>
+
+            <button
+                type="button"
+                class="btn btn-success pull-right open-add-modal"
+                data-toggle="modal"
+                data-target="#addMasterModal"
+                data-master-type="<?php echo htmlspecialchars($key); ?>"
+                data-master-title="<?php echo htmlspecialchars($title); ?>">
+                <i class="fa fa-plus"></i>
+            </button>
+
+        <?php } ?>
 
     </div>
 
@@ -1242,7 +1265,7 @@ if ($subMenuResult) {
           </div>
 
           <div class="form-group">
-            <label for="add_sort_order" class="control-label">Sequence</label>
+            <label for="add_sort_order" class="control-label">Sort Order</label>
             <input type="number" name="sort_order" id="add_sort_order" class="form-control" min="1" placeholder="Auto if blank">
           </div>
         </div>
