@@ -16,11 +16,12 @@ if ($currentUserId <= 0 || $currentRoleId <= 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && $currentUserId > 0 && $currentRoleId > 0) {
-  $profileName = trim((string) ($_POST['profile_name'] ?? ''));
+  $firstName = trim((string) ($_POST['first_name'] ?? ''));
+  $lastName = trim((string) ($_POST['last_name'] ?? ''));
   $profileEmail = trim((string) ($_POST['profile_email'] ?? ''));
   $profilePhone = trim((string) ($_POST['profile_phone'] ?? ''));
 
-  if ($profileName === '') {
+  if ($firstName === '') {
     $profileAlertType = 'warning';
     $profileAlertMessage = 'Name is required.';
   } elseif ($profileEmail !== '' && !filter_var($profileEmail, FILTER_VALIDATE_EMAIL)) {
@@ -30,15 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
     mysqli_begin_transaction($db_handle->conn);
     $ok = true;
 
-    $loginUpdateSql = "UPDATE rt_login SET username = ? WHERE user_id = ? AND role_id = ?";
-    $loginStmt = mysqli_prepare($db_handle->conn, $loginUpdateSql);
-    if ($loginStmt) {
-      mysqli_stmt_bind_param($loginStmt, 'sii', $profileName, $currentUserId, $currentRoleId);
-      $ok = $ok && mysqli_stmt_execute($loginStmt);
-      mysqli_stmt_close($loginStmt);
-    } else {
-      $ok = false;
-    }
+    // $loginUpdateSql = "UPDATE rt_login SET username = ? WHERE user_id = ? AND role_id = ?";
+    // $loginStmt = mysqli_prepare($db_handle->conn, $loginUpdateSql);
+    // if ($loginStmt) {
+    //   mysqli_stmt_bind_param($loginStmt, 'sii', $profileName, $currentUserId, $currentRoleId);
+    //   $ok = $ok && mysqli_stmt_execute($loginStmt);
+    //   mysqli_stmt_close($loginStmt);
+    // } else {
+    //   $ok = false;
+    // }
 
     if ($ok) {
       $profileCheckSql = "SELECT user_id FROM rt_user_master WHERE user_id = ? AND role_id = ? LIMIT 1";
@@ -51,20 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
         mysqli_stmt_close($profileCheckStmt);
 
         if ($profileExists) {
-          $profileUpdateSql = "UPDATE rt_user_master SET first_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
+          $profileUpdateSql = "UPDATE rt_user_master SET first_name = ?, last_name = ?, email_id = ?, phone_number = ? WHERE user_id = ? AND role_id = ?";
           $profileUpdateStmt = mysqli_prepare($db_handle->conn, $profileUpdateSql);
           if ($profileUpdateStmt) {
-            mysqli_stmt_bind_param($profileUpdateStmt, 'sssii', $profileName, $profileEmail, $profilePhone, $currentUserId, $currentRoleId);
+            mysqli_stmt_bind_param($profileUpdateStmt, 'ssssii', $firstName, $lastName, $profileEmail, $profilePhone, $currentUserId, $currentRoleId);
             $ok = $ok && mysqli_stmt_execute($profileUpdateStmt);
             mysqli_stmt_close($profileUpdateStmt);
           } else {
             $ok = false;
           }
         } else {
-          $profileInsertSql = "INSERT INTO rt_user_master (user_id, first_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, 0, ?, 0)";
+          $profileInsertSql = "INSERT INTO rt_user_master (user_id, first_name, last_name, email_id, phone_number, department_id, role_id, student_id) VALUES (?, ?, ?, ?, ?, 0, ?, 0)";
           $profileInsertStmt = mysqli_prepare($db_handle->conn, $profileInsertSql);
           if ($profileInsertStmt) {
-            mysqli_stmt_bind_param($profileInsertStmt, 'isssi', $currentUserId, $profileName, $profileEmail, $profilePhone, $currentRoleId);
+            mysqli_stmt_bind_param($profileInsertStmt, 'issssi', $currentUserId, $firstName, $lastName, $profileEmail, $profilePhone, $currentRoleId);
             $ok = $ok && mysqli_stmt_execute($profileInsertStmt);
             mysqli_stmt_close($profileInsertStmt);
           } else {
@@ -80,8 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
       mysqli_commit($db_handle->conn);
       $profileAlertType = 'success';
       $profileAlertMessage = 'Profile updated successfully.';
-      $username = $profileName;
-      $name = $profileName;
+
+      $username = trim($firstName . ' ' . $lastName);
+      $name = trim($firstName . ' ' . $lastName);
+
     } else {
       mysqli_rollback($db_handle->conn);
       $profileAlertType = 'danger';
@@ -91,6 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
 }
 
 $profileData = array(
+  'first_name' => '',
+  'last_name' => '',
   'username' => (string) ($username ?? ''),
   'role_name' => (string) ($role_name ?? ''),
   'email_id' => '',
@@ -107,10 +112,16 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
     mysqli_stmt_execute($profileStmt);
     $profileResult = mysqli_stmt_get_result($profileStmt);
     if ($profileResult && ($row = mysqli_fetch_assoc($profileResult))) {
-      $displayName = trim((string) ($row['first_name'] ?? ''));
+
+      $profileData['first_name'] = (string) ($row['first_name'] ?? '');
+      $profileData['last_name'] = (string) ($row['last_name'] ?? '');
+
+      $displayName = trim($profileData['first_name'] . ' ' . $profileData['last_name']);
+
       if ($displayName === '') {
         $displayName = (string) ($row['username'] ?? '');
       }
+
       $profileData['username'] = $displayName;
       $profileData['role_name'] = (string) ($row['role_name'] ?? $profileData['role_name']);
       $profileData['email_id'] = (string) ($row['email_id'] ?? '');
@@ -314,7 +325,8 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
               </div>
               <div class="profile-meta-row">
                 <span class="profile-meta-label">Department</span>
-                <span class="profile-meta-value"><?php echo htmlspecialchars($profileData['department_name'] !== '' ? $profileData['department_name'] : 'N/A'); ?></span>
+                <span
+                  class="profile-meta-value"><?php echo htmlspecialchars($profileData['department_name'] !== '' ? $profileData['department_name'] : 'N/A'); ?></span>
               </div>
               <div class="profile-meta-row">
                 <span class="profile-meta-label">Status</span>
@@ -343,11 +355,31 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
           <form class="form-horizontal" method="POST">
             <div class="box-body">
               <div class="form-group">
-                <label class="col-sm-3 control-label">Name</label>
+                <label class="col-sm-3 control-label">First Name</label>
+
                 <div class="col-sm-9">
                   <div class="input-group profile-input-group">
-                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                    <input type="text" class="form-control" name="profile_name" value="<?php echo htmlspecialchars($profileData['username']); ?>" required>
+                    <span class="input-group-addon">
+                      <i class="fa fa-user"></i>
+                    </span>
+
+                    <input type="text" class="form-control" name="first_name"
+                      value="<?php echo htmlspecialchars($profileData['first_name']); ?>" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label">Last Name</label>
+
+                <div class="col-sm-9">
+                  <div class="input-group profile-input-group">
+                    <span class="input-group-addon">
+                      <i class="fa fa-user"></i>
+                    </span>
+
+                    <input type="text" class="form-control" name="last_name"
+                      value="<?php echo htmlspecialchars($profileData['last_name']); ?>" required>
                   </div>
                 </div>
               </div>
@@ -357,7 +389,8 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
                 <div class="col-sm-9">
                   <div class="input-group profile-input-group">
                     <span class="input-group-addon"><i class="fa fa-shield"></i></span>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($profileData['role_name']); ?>" readonly>
+                    <input type="text" class="form-control"
+                      value="<?php echo htmlspecialchars($profileData['role_name']); ?>" readonly>
                   </div>
                 </div>
               </div>
@@ -367,7 +400,8 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
                 <div class="col-sm-9">
                   <div class="input-group profile-input-group">
                     <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
-                    <input type="email" class="form-control" name="profile_email" value="<?php echo htmlspecialchars($profileData['email_id']); ?>" placeholder="Enter email">
+                    <input type="email" class="form-control" name="profile_email"
+                      value="<?php echo htmlspecialchars($profileData['email_id']); ?>" placeholder="Enter email">
                   </div>
                 </div>
               </div>
@@ -377,14 +411,17 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
                 <div class="col-sm-9">
                   <div class="input-group profile-input-group">
                     <span class="input-group-addon"><i class="fa fa-phone"></i></span>
-                    <input type="text" class="form-control" name="profile_phone" value="<?php echo htmlspecialchars($profileData['phone_number']); ?>" placeholder="Enter phone number">
+                    <input type="text" class="form-control" name="profile_phone"
+                      value="<?php echo htmlspecialchars($profileData['phone_number']); ?>"
+                      placeholder="Enter phone number">
                   </div>
                 </div>
               </div>
             </div>
             <div class="box-footer">
               <input type="hidden" name="update_profile" value="1">
-              <button type="submit" class="pull-right profile-save-btn"><i class="fa fa-check"></i> Update Profile</button>
+              <button type="submit" class="pull-right profile-save-btn"><i class="fa fa-check"></i> Update
+                Profile</button>
             </div>
           </form>
         </div>

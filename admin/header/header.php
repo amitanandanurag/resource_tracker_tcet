@@ -10,32 +10,33 @@ if (isset($_SESSION['user_session'])) {
 
 $db_handle = new DBController();
 
-$sql = "SELECT * FROM rt_login 
-WHERE user_id='" . $_SESSION['user_session'] . "'";
+$sql = "SELECT l.*, u.first_name, u.last_name, u.email_id
+        FROM rt_login l
+        LEFT JOIN rt_user_master u
+            ON l.user_id = u.user_id
+           AND l.role_id = u.role_id
+        WHERE l.user_id='" . $_SESSION['user_session'] . "'";
 
 $result = mysqli_query($db_handle->conn, $sql)
-  or die("database error:" . mysqli_error($db_handle->conn));
+    or die("database error:" . mysqli_error($db_handle->conn));
 
 $row = mysqli_fetch_assoc($result);
 
 $username = $row['username'];
 $userid = $row['user_id'];
 $usertype = $row['role_id'];
-$name = $row['username'];
 
-$full_email = $username;
+$first_name = trim($row['first_name'] ?? '');
+$last_name  = trim($row['last_name'] ?? '');
 
-if (strpos($full_email, '@') !== false) {
-    $display_name = ucwords(
-        str_replace(
-            ['.', '_'],
-            ' ',
-            strstr($full_email, '@', true)
-        )
-    );
-} else {
-    $display_name = $full_email;
+$display_name = trim($first_name . ' ' . $last_name);
+
+if ($display_name == '') {
+    $display_name = $username;
 }
+
+$name = $display_name;
+$full_email = $row['email_id'];
 
 $sql = "SELECT * FROM rt_role_master WHERE role_id='" . $usertype . "'";
 $result = mysqli_query($db_handle->conn, $sql) or die("database error:" . mysqli_error($db_handle->conn));
@@ -290,9 +291,9 @@ while ($row = $result->fetch_assoc()) {
                     style="border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                   <p style="margin-top: 15px; font-weight: 600; font-size: 18px;">
                     <?php echo $display_name; ?>
-                    <!--<small style="display: block; opacity: 0.8; font-weight: 400; font-size: 12px; margin-top: 5px;">
+                    <small style="display: block; opacity: 0.8; font-weight: 400; font-size: 12px; margin-top: 5px;">
                       <?php echo $full_email; ?>
-                    </small>-->
+                    </small>
                   </p>
                   <span class="label label-default"
                     style="background: rgba(255,255,255,0.2); font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">
