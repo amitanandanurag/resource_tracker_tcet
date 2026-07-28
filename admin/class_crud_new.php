@@ -997,7 +997,7 @@ if ($subMenuResult) {
               <a data-toggle="tab" href="#userlog-list">User Logs</a>
           </li>
 
-         <!-- <li class="<?php echo ($activeTab === 'menuallocation-list') ? 'active' : ''; ?>">
+         <!-- <li class="//?php echo ($activeTab === 'menuallocation-list') ? 'active' : ''; ?>">
               <a data-toggle="tab" href="#menuallocation-list">Menu Allocation</a>
           </li>-->
 
