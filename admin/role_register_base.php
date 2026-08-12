@@ -40,8 +40,13 @@
               <input type="hidden" name="role_id" value="<?php echo intval($roleId); ?>">
 
               <div class="form-group">
-                <label>Name <span style="color:red;">*</span></label>
-                <input type="text" name="user_name" class="form-control" required>
+                <label>First Name <span style="color:red;">*</span></label>
+                <input type="text" name="first_name" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label>Last Name <span style="color:red;">*</span></label>
+                <input type="text" name="last_name" class="form-control" required>
               </div>
 
               <div class="form-group">

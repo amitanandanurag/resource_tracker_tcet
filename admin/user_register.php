@@ -1,13 +1,11 @@
 <?php include "header/header.php"; ?>
 <?php
-$roleKey = strtolower(trim($_GET['role'] ?? 'admin'));
+$roleKey = strtolower(trim($_GET['role'] ?? 'coordinator'));
 $roleMap = array(
-  'admin' => array('id' => 2, 'label' => 'Admin'),
-  'coordinator' => array('id' => 3, 'label' => 'Coordinator / HOD'),
-  'mentor' => array('id' => 4, 'label' => 'Mentor')
+  'coordinator' => array('id' => 3, 'label' => 'Coordinator / HOD')
 );
 if (!isset($roleMap[$roleKey])) {
-  $roleKey = 'admin';
+  $roleKey = 'coordinator';
 }
 $roleId = $roleMap[$roleKey]['id'];
 $roleLabel = $roleMap[$roleKey]['label'];
@@ -34,8 +32,9 @@ $roleLabel = $roleMap[$roleKey]['label'];
               <input type="hidden" name="role_id" value="<?php echo intval($roleId); ?>">
               <input type="hidden" name="role_key" value="<?php echo htmlspecialchars($roleKey); ?>">
 
+              <!-- //Department ->first_name  -->
               <div class="form-group">
-                <label>Name <span style="color:red;">*</span></label>
+                <label>Department Name: <span style="color:red;">*</span></label>
                 <input type="text" name="user_name" class="form-control" required>
               </div>
 
@@ -74,3 +73,5 @@ $roleLabel = $roleMap[$roleKey]['label'];
   </section>
 </div>
 <?php include "header/footer.php"; ?>
+
+

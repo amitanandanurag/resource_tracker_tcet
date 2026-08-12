@@ -32,15 +32,32 @@ if (!$row) {
 if($row['password'] == $user_password){
 
     // ✅ FIXED SESSION
-    $_SESSION['user_session'] = $row['user_id'];
-    $_SESSION['role_id'] = $row['role_id'];  // 🔥 IMPORTANT
+    // $_SESSION['user_session'] = $row['user_id'];
+    // $_SESSION['role_id'] = $row['role_id'];  // 🔥 IMPORTANT
 
+    $_SESSION['user_session'] = $row['user_id'];
+    $_SESSION['user_id']      = $row['login_id'];
+    $_SESSION['role_id']      = $row['role_id'];
+
+    ob_clean();
     // REDIRECTION RESPONSE
-    if($row['role_id'] == 1){
+    if($row['role_id'] == 2 && $user_password == "TCET@1234")
+    {
+        ob_clean();
+        echo "update";
+        
+    }
+    else if($row['role_id'] == 1){
         echo "ok";
     }
     else if($row['role_id'] == 2){
         echo "ok1";
+    }
+    if($row['role_id'] == 3 && $user_password == "TCET@1234")
+    {
+        ob_clean();
+        echo "update";
+        
     }
     else if($row['role_id'] == 3){
         echo "ok2";

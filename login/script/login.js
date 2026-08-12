@@ -30,7 +30,8 @@ $('document').ready(function() {
 				$("#login_button").html('<span class="glyphicon glyphicon-transfer"></span> &nbsp; sending ...');
 			},
 			success : function(response){	
-				var cleanResponse = $.trim(response || '');
+				var cleanResponse = $.trim(response);
+				// var cleanResponse = $.trim(response || '');
 				var lowerResponse = cleanResponse.toLowerCase();
 
 				if (
@@ -44,7 +45,14 @@ $('document').ready(function() {
 
 				console.log(cleanResponse);
 
-				if(cleanResponse=="ok" || cleanResponse=="ok1" || cleanResponse=="ok2" || cleanResponse=="ok3" || cleanResponse=="ok4"){
+				if(cleanResponse==="update")
+				{
+					$("#login_button").html('First Time Login detected...');
+					setTimeout(function() { 
+						window.location.href = "../admin/admin_change_password.php"; 
+					}, 1000);
+				}
+				else if(cleanResponse=="ok" || cleanResponse=="ok1" || cleanResponse=="ok2" || cleanResponse=="ok3" || cleanResponse=="ok4"){
 					$("#login_button").html('<img src="ajax-loader.gif" /> &nbsp; Signing In ...');
 					setTimeout(function(){ window.location.href = "../admin/index.php"; }, 1000);
 				} 

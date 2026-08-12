@@ -37,9 +37,17 @@ if ($checkResult && $checkResult->num_rows > 0) {
   exit;
 }
 
-$insertSql = "INSERT INTO rt_user_master (user_name, email_id, phone_number, department_id, role_id, student_id) VALUES ('$userNameEsc', '$emailEsc', '$phoneEsc', $departmentId, $roleId, 0)";
+$DEFAULT_PASSWORD = "TCET@1234";
+
+$insertSql = "INSERT INTO rt_user_master (first_name, email_id, password, phone_number, department_id, role_id, student_id) VALUES ('$userNameEsc', '$emailEsc', '$DEFAULT_PASSWORD', '$phoneEsc', $departmentId, $roleId, 0)";
 $db_handle->query($insertSql);
 
+$newUserId = mysqli_insert_id($db_handle->conn);
+
+$sqlLogin = "INSERT INTO rt_login (username, password, role_id, user_id, created_at) 
+                 VALUES ('$emailEsc', '$DEFAULT_PASSWORD', $roleId, $newUserId, NOW())";
+$db_handle->query($sqlLogin);
+  
 header('Location: user-info.php?role=' . urlencode($roleKey));
 exit;
 ?>
