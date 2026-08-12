@@ -355,7 +355,7 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
           <form class="form-horizontal" method="POST">
             <div class="box-body">
               <div class="form-group">
-                <label class="col-sm-3 control-label">First Name</label>
+                <label class="col-sm-3 control-label">Department Name</label>
 
                 <div class="col-sm-9">
                   <div class="input-group profile-input-group">
@@ -369,7 +369,7 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
                 </div>
               </div>
 
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label class="col-sm-3 control-label">Last Name</label>
 
                 <div class="col-sm-9">
@@ -382,7 +382,7 @@ if ($currentUserId > 0 && $currentRoleId > 0) {
                       value="<?php echo htmlspecialchars($profileData['last_name']); ?>" required>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <div class="form-group">
                 <label class="col-sm-3 control-label">Role</label>

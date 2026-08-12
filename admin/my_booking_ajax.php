@@ -28,13 +28,29 @@ if(!empty($result)){
     foreach($result as $row){
 
         $action = "<button onclick='cancel(".$row['booking_id'].")' class='btn btn-danger btn-sm'>Cancel</button>";
+        $status = trim(strtolower($row['status']));
 
+        if($status == "underprocess"){
+            $statusBtn = "<span class='btn btn-warning btn-sm'>Under Process</span>";
+        }
+        elseif($status == "approved"){
+            $statusBtn = "<span class='btn btn-success btn-sm'>Approved</span>";
+        }
+        elseif($status == "rejected"){
+            $statusBtn = "<span class='btn btn-danger btn-sm'>Rejected</span>";
+        }
+        elseif($status == "cancelled"){
+            $statusBtn = "<span class='btn btn-default btn-sm'>Cancelled</span>";
+        }
+        else{
+            $statusBtn = $row['status'];
+        }
         $data[] = [
             "id" => $row['booking_id'],
             "resource" => $row['resource_name'],
             "date" => $row['booking_date'],
             "slot" => $row['label'],
-            "status" => $row['status'],
+            "status" => $statusBtn,
             "action" => $action
         ];
     }

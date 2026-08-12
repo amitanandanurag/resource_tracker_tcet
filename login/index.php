@@ -303,11 +303,11 @@ form {
                     <div class="forgot">
                         <a href="forgot_password.php">Forgot password?</a>
                     </div>
-                    <div class="register">
+                    <!-- <div class="register">
                         <a href="javascript:void(0)" onclick="openRegister()">
                             New User? Register Here
                         </a>
-                    </div>
+                    </div> -->
                     
                     <div id="error"></div>
                 </form> 

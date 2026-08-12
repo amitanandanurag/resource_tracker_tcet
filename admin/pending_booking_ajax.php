@@ -17,7 +17,7 @@ SELECT b.booking_id, b.booking_date,
 FROM rt_bookings b
 JOIN rt_resources r ON r.resource_id = b.resource_id
 JOIN rt_time_slots t ON t.slot_id = b.slot_id
-WHERE b.status = 'pending'
+WHERE b.status = 'underprocess'
 ";
 
 $result = $db->runQuery($query);
